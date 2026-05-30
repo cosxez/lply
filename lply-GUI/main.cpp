@@ -1,5 +1,7 @@
 #define MINIAUDIO_IMPLEMENTATION
 
+#include <iostream>
+
 #include "miniaudio.h"
 #include <SDL2/SDL.h>
 #include <string>
@@ -14,8 +16,6 @@
 #include "sdh.h"
 #include "network.h"
 #include "font.h"
-
-#include <iostream>
 
 int main(int args,char* argv[])
 {
@@ -118,7 +118,10 @@ int main(int args,char* argv[])
 	}
 
 	std::vector<std::vector<unsigned char>> tmv;
-	std::vector<unsigned char> mbuff;
+//	std::vector<unsigned char> mbuff;
+
+	size_t mbuffs=0;
+	char* mbuff=(char*)malloc(mbuffs);
 
 	ma_engine eng;
 	ma_engine_init(NULL,&eng);
@@ -128,11 +131,15 @@ int main(int args,char* argv[])
 
 	float cv=0.5;
 	ma_engine_set_volume(&eng,cv);
+	char is_busy=0;
 	while (run)
 	{
 		SDL_RenderCopy(ren,btex,NULL,NULL);
 		SDL_SetRenderDrawColor(ren,0,0,0,255);
 		for (unsigned int y=14*font_size;y<win_height;y++){SDL_RenderDrawLine(ren,win_width-24*font_size,y,win_width,y);}
+		for (unsigned short i=0;i<mvec[mlisti-1].size();i++){printc(mvec[mlisti-1][i],font_size,0,0,0,ren,lx,0);lx+=12*font_size;}
+		
+		lx=0;ly=14*font_size;
 		while (SDL_PollEvent(&ev))
 		{
 			if (ev.type==SDL_QUIT){run=0;}
@@ -159,7 +166,7 @@ int main(int args,char* argv[])
 					if (sfmi==tbfch){cirm=1;break;}
 				}
 				
-				if (cirm==0)
+				if (cirm==0 && is_busy==0)
 				{
 					unsigned int sfli=0;
 					std::string sfb;
@@ -176,9 +183,11 @@ int main(int args,char* argv[])
 					sendto(sock,&bfgmd,sizeof(bfgmd),0,(struct sockaddr*)&faddr,sizeof(faddr));
 					size_t bsfm;
 					if (lply_read(&sock,&faddr,&bsfm,sizeof(bsfm))<1){sclose(&sock);return -2;}
-					mbuff.resize(bsfm);
+					char* tmp=(char*)realloc(mbuff,bsfm);
+					mbuff=tmp;mbuffs=bsfm;
+				//	mbuff.resize(bsfm);
 					
-					std::thread(lply_rmdap,&sock,&faddr,mbuff.data(),bsfm,&eng,&decoder,&sound).detach();	
+					std::thread(lply_rmdap,&sock,&faddr,mbuff,bsfm,&eng,&decoder,&sound,&is_busy).detach();	
 					
 					continue;
 				}
@@ -210,6 +219,7 @@ int main(int args,char* argv[])
 	ma_decoder_uninit(&decoder);
 	ma_engine_uninit(&eng);
 	
+	free(mbuff);
 	delete[] _binary_font_cwqf_start;
 	SDL_DestroyTexture(btex);
 	SDL_DestroyRenderer(ren);

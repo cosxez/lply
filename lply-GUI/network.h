@@ -84,7 +84,16 @@ short crdt(int *sock,struct sockaddr_in *faddr,unsigned short mgr,void *wrd,size
 	return 0;
 }
 
-void lply_rmdap(int *sock,struct sockaddr_in *faddr,void *pbuff,size_t sbuff,ma_engine *eng,ma_decoder *decoder,ma_sound *sound)
+void lply_lg(int *sock,struct sockaddr_in *faddr,char *is_g,void *pbuff, size_t sbuff)
+{
+	struct sockaddr_in ffaddr;
+	socklen_t ips=sizeof(ffaddr);
+	
+	recvfrom(*sock,pbuff,sbuff,0,(struct sockaddr*)&ffaddr,&ips);
+	if (ffaddr.sin_addr.s_addr==faddr->sin_addr.s_addr){*is_g=1;}
+}
+
+void lply_rmdap(int *sock,struct sockaddr_in *faddr,void *pbuff,size_t sbuff,ma_engine *eng,ma_decoder *decoder,ma_sound *sound,char *is_busy)
 {
 	if (ma_sound_is_playing(sound)){ma_sound_stop(sound);}
 	ma_sound_uninit(sound);
@@ -92,6 +101,7 @@ void lply_rmdap(int *sock,struct sockaddr_in *faddr,void *pbuff,size_t sbuff,ma_
 
 	size_t crp=0;
 	unsigned char nfdwr=0;
+	*is_busy=1;
 	while (crp<sbuff)
 	{
 		size_t csb=lply_read(sock,faddr,(char*)(pbuff)+crp,sbuff);
@@ -101,6 +111,7 @@ void lply_rmdap(int *sock,struct sockaddr_in *faddr,void *pbuff,size_t sbuff,ma_
 	}
 	if (nfdwr==0){unsigned short yaya;if (lply_read(sock,faddr,&yaya,sizeof(yaya))<1){return;}}
 
+	*is_busy=0;
 	ma_decoder_init_memory(pbuff,sbuff,NULL,decoder);
 	ma_sound_init_from_data_source(eng,decoder,0,NULL,sound);
 	ma_sound_start(sound);
