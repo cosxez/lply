@@ -106,6 +106,7 @@ int main(int args,char* argv[])
 	unsigned char font_size=1;
 	unsigned int lx=0;unsigned int ly=14*font_size;
 	unsigned int mlisti=1;
+	unsigned int mlistio=0;
 	
 	std::vector<std::string> mvec;
 	{
@@ -137,13 +138,15 @@ int main(int args,char* argv[])
 		SDL_RenderCopy(ren,btex,NULL,NULL);
 		SDL_SetRenderDrawColor(ren,0,0,0,255);
 		for (unsigned int y=14*font_size;y<win_height;y++){SDL_RenderDrawLine(ren,win_width-24*font_size,y,win_width,y);}
-		for (unsigned short i=0;i<mvec[mlisti-1].size();i++){printc(mvec[mlisti-1][i],font_size,0,0,0,ren,lx,0);lx+=12*font_size;}
+		for (unsigned short i=0;i<mvec[mlisti+mlistio-1].size();i++){printc(mvec[mlisti+mlistio-1][i],font_size,0,0,0,ren,lx,0);lx+=12*font_size;}
 		
 		lx=0;ly=14*font_size;
 		while (SDL_PollEvent(&ev))
 		{
 			if (ev.type==SDL_QUIT){run=0;}
-			if (ev.type==SDL_KEYDOWN && ev.key.keysym.sym==SDLK_UP && ev.key.repeat==0){if (mlisti>1){mlisti-=1;break;}}if (ev.type==SDL_KEYDOWN && ev.key.keysym.sym==SDLK_DOWN && ev.key.repeat==0){if (mlisti<mvec.size()){mlisti+=1;break;}}
+			if (ev.type==SDL_KEYDOWN && ev.key.keysym.sym==SDLK_UP){if (mlistio>0 && ((mlisti+2)*(14*font_size)==(3*(14*font_size)))){mlistio-=1;break;}if ((mlisti+mlistio)>1){mlisti-=1;break;}}
+			if (ev.type==SDL_KEYDOWN && ev.key.keysym.sym==SDLK_DOWN){if ((mlisti+mlistio)<mvec.size() && ((mlisti+2)*(14*font_size)<win_height)){mlisti+=1;break;}if ((mlisti+mlistio)<mvec.size() && ((mlisti+2)*(14*font_size)>=win_height)){mlistio+=1;break;}}
+			
 			if (ev.type==SDL_KEYDOWN && ev.key.keysym.sym==SDLK_RIGHT){if ((cv+0.05)<=1){cv+=0.05;ma_engine_set_volume(&eng,cv);}}
 			if (ev.type==SDL_KEYDOWN && ev.key.keysym.sym==SDLK_LEFT){if ((cv-0.05)>=0){cv-=0.05;ma_engine_set_volume(&eng,cv);}}
 			if (ev.type==SDL_KEYDOWN && ev.key.keysym.sym==SDLK_SPACE && ev.key.repeat==0){if (ma_sound_is_playing(&sound)){ma_sound_stop(&sound);break;}if (!ma_sound_is_playing(&sound)){ma_sound_start(&sound);break;}}
@@ -153,7 +156,7 @@ int main(int args,char* argv[])
 				std::string sfmi;
 				for (unsigned int i=0;i<mlistrm;i++)
 				{
-					if (mlist[i]=='\n'){smli+=1;if (smli==mlisti){break;}sfmi="";i+=1;}
+					if (mlist[i]=='\n'){smli+=1;if (smli==(mlisti+mlistio)){break;}sfmi="";i+=1;}
 					sfmi+=mlist[i];
 				}
 
@@ -198,7 +201,7 @@ int main(int args,char* argv[])
 				}
 			}
 		}
-		for (unsigned int i=0;i<mvec.size();i++)
+		for (unsigned int i=mlistio;i<mvec.size();i++)
 		{
 			if (ly>=(win_height-14*font_size)){break;}
 			for (unsigned int j=0;j<mvec[i].size();j++)
