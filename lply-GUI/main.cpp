@@ -18,19 +18,12 @@
 #include "font.h"
 
 int main(int args,char* argv[])
-{
-	std::ifstream file("config");
-	if (!file.is_open()){return -1;}
-	
-	char buffer_f_cfg[2048];
-	unsigned short bfg_idx=0;
-	while (!file.eof()){if (bfg_idx==2048){break;}file.get(buffer_f_cfg[bfg_idx]);bfg_idx+=1;}
-	file.close();
-	buffer_f_cfg[bfg_idx]='\0';
-	
+{	
 	std::string ip;
 	unsigned short port;
-	cfg_pars(buffer_f_cfg,&ip,&port);
+	struct cnf conf;
+
+	if (cfg_pars(&conf,&ip,&port)!=0){return -1;}
 
 	int sock=socket(AF_INET,SOCK_DGRAM,0);
 	
@@ -122,7 +115,7 @@ int main(int args,char* argv[])
 //	std::vector<unsigned char> mbuff;
 
 	size_t mbuffs=0;
-	char* mbuff=(char*)malloc(mbuffs);
+	char* mbuff=nullptr;
 
 	ma_engine eng;
 	ma_engine_init(NULL,&eng);
@@ -180,17 +173,22 @@ int main(int args,char* argv[])
 					}
 
 					unsigned char bfgmd[2+sfb.size()];
-					*(unsigned short*)bfgmd=0x6e9d;
+					*(unsigned short*)bfgmd=0x65f1;
 					memcpy(&bfgmd[2],sfb.data(),sfb.size());
 
 					sendto(sock,&bfgmd,sizeof(bfgmd),0,(struct sockaddr*)&faddr,sizeof(faddr));
 					size_t bsfm;
-					if (lply_read(&sock,&faddr,&bsfm,sizeof(bsfm))<1){sclose(&sock);return -2;}
-					char* tmp=(char*)realloc(mbuff,bsfm);
-					mbuff=tmp;mbuffs=bsfm;
+					while (1)
+					{
+						if (lply_read(&sock,&faddr,&bsfm,sizeof(bsfm),MSG_DONTWAIT)==8){break;}
+					}
+					mbuff=(char*)malloc(bsfm);	
+				//	char* tmp=(char*)realloc(mbuff,bsfm);
+				//	mbuff=tmp;mbuffs=bsfm;
 				//	mbuff.resize(bsfm);
 					
-					std::thread(lply_rmdap,&sock,&faddr,mbuff,bsfm,&eng,&decoder,&sound,&is_busy).detach();	
+					if (conf.with_s='y'){std::thread(lply_rmdaps,&sock,&faddr,mbuff,bsfm,&eng,&decoder,&sound,&is_busy,sfb).detach();}
+					else{std::thread(lply_rmdap,&sock,&faddr,mbuff,bsfm,&eng,&decoder,&sound,&is_busy).detach();}
 					
 					continue;
 				}

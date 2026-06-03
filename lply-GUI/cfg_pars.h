@@ -1,34 +1,51 @@
 #pragma once
 
-void cfg_pars(char str[],std::string *ip_addr, unsigned short *port)
+struct cnf
 {
-	for (unsigned short i=1;i<2048;i++)
+	char with_s;
+};
+
+short cfg_pars(struct cnf *conf,std::string *ip_addr, unsigned short *port)
+{
+	std::ifstream file("config");
+	if (file.is_open())
 	{
-		if (str[i]=='p' &&str[i-1]=='i')
+		while (!file.eof())
 		{
-			i+=2;
-			unsigned char j=0;
-			for (j;str[i]!='\n';i++)
+			std::string cl;
+			std::string arg="";
+			std::string pr="";
+
+			getline(file,cl);
+			int cpos=0;
+			for (int i=0;cl[i]!='=';i++)
 			{
-				if (i>=2048){break;}
-				if (j>=64){break;}
-				*ip_addr+=str[i];
-				j++;
+				if (i>=cl.size()){break;}
+				arg+=cl[i];
+				cpos=i;
 			}
-		}
-		if (str[i]=='t'&&str[i-1]=='p')
-		{
-			i+=2;
-			unsigned char j=0;
-			std::string npt;
-			for (j;str[i]!='\n';i++)
+			if (cpos+2<cl.size())
 			{
-				if (i>=2048){break;}
-				if (j>=6){break;}
-				npt+=str[i];
-				j++;
+				cpos+=2;
+				for (cpos;cpos<cl.size();cpos++)
+				{
+					pr+=cl[cpos];
+				}
 			}
-			*port=std::stoi(npt);
+			if (arg=="ip")
+			{
+				*ip_addr=pr;
+			}
+			if (arg=="pt")		
+			{
+				*port=std::stoi(pr);
+			}
+			if (arg=="with-retry")
+			{
+				conf->with_s=pr[0];
+			}
 		}
 	}
+	else{return 1;}
+	return 0;
 }

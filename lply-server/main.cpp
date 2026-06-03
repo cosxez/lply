@@ -15,6 +15,7 @@ struct cnf
 {
 	char dmp[256];
 	unsigned short dmps=0;
+	char with_s;
 };
 
 char cfgp(struct cnf *conf)
@@ -53,6 +54,10 @@ char cfgp(struct cnf *conf)
 				}
 				conf->dmp[i]='\0';conf->dmps=i;
 			}
+			if (arg=="with-retry")
+			{
+				conf->with_s=pr[0];
+			}
 		}
 	}
 	else{return 1;}
@@ -64,84 +69,6 @@ void sclose(int *sock)
 {
 	if (*sock<0){return;}
 	else{close(*sock);*sock=-1;}
-}
-
-void udp_client(int *sock,struct sockaddr_in faddr,struct cnf *conf)
-{
-	struct sockaddr_in ffaddr;
-	socklen_t ips=sizeof(ffaddr);
-	unsigned short con_mgc=0xac5f;
-	unsigned short mgcfe=0xe1dd;
-	sendto(*sock,&con_mgc,sizeof(con_mgc),0,(struct sockaddr*)&faddr,sizeof(faddr));
-
-	std::string mlist;
-	std::vector<const char*> flist;
-	for (auto &c:std::filesystem::directory_iterator(conf->dmp))
-	{
-		if (!std::filesystem::is_directory(c))
-		{
-			std::ifstream file(std::string(conf->dmp)+'/'+(c.path().filename().string()),std::ios::binary);
-			if (file.is_open())
-			{
-				unsigned short sns;file.read(reinterpret_cast<char*>(&sns),2);
-				char tcfm[sns];
-				file.read(reinterpret_cast<char*>(&tcfm),sns);
-				file.close();
-				flist.push_back((c.path().filename().string()).c_str());
-				mlist+=std::string(tcfm,sns)+'\n';
-			}
-		}
-	}
-	size_t mlists=mlist.size();
-	sendto(*sock,&mlists,sizeof(mlists)-1,0,(struct sockaddr*)&faddr,sizeof(faddr));
-	sendto(*sock,mlist.c_str(),mlists-1,0,(struct sockaddr*)&faddr,sizeof(faddr));
-
-	unsigned int mli;
-	ssize_t sb=recvfrom(*sock,&mli,sizeof(mli),0,(struct sockaddr*)&ffaddr,&ips);
-	std::cout<<"was read\n";
-	if (faddr.sin_addr.s_addr==ffaddr.sin_addr.s_addr)
-	{
-		unsigned int smli=0;
-		std::string sfmi;
-		for (unsigned int i=0;i<mlists;i++)
-		{
-			if (mlist[i]=='\n'){smli+=1;if (smli==mli){break;}sfmi="";}
-			sfmi+=mlist[i];
-		}
-
-		std::cout<<flist[smli-1]<<std::endl;
-		std::ifstream file(std::string(conf->dmp)+'/'+flist[smli-1],std::ios::binary);
-		if (file.is_open())
-		{
-			std::cout<<"opened\n";
-			file.seekg(0,std::ios::end);
-			size_t fs=file.tellg();
-			file.seekg(0,std::ios::beg);
-
-			unsigned char bfs[fs];
-			file.read(reinterpret_cast<char*>(&bfs),fs);
-			file.close();
-
-			sendto(*sock,&fs,sizeof(fs),0,(struct sockaddr*)&faddr,sizeof(faddr));
-			size_t cpc=0;
-			while (cpc<fs)
-			{
-				if ((cpc+1024)<fs)
-				{
-					sendto(*sock,&bfs[cpc],1024,0,(struct sockaddr*)&faddr,sizeof(faddr));
-					cpc+=1024;
-				}
-				else
-				{
-					sendto(*sock,&bfs[cpc],fs-cpc,0,(struct sockaddr*)&faddr,sizeof(faddr));
-					cpc+=fs-cpc;
-				}
-			}
-			unsigned short mgfer=0x3bad;
-			sendto(*sock,&mgfer,sizeof(mgfer),0,(struct sockaddr*)&faddr,sizeof(faddr));
-		}
-	}
-	std::cout<<"client disconnected\n";
 }
 
 void udp_smlist(int *sock,struct sockaddr_in faddr,struct cnf *conf)
@@ -187,7 +114,6 @@ void udp_smd(int *sock,struct sockaddr_in faddr,struct cnf *conf,std::string mfn
 		file.read(reinterpret_cast<char*>(bfs.data()),fs);
 		file.close();
 
-		sendto(*sock,&fs,sizeof(fs),0,(struct sockaddr*)&faddr,sizeof(faddr));
 		size_t cpc=0;
 		while (cpc<fs)
 		{
@@ -208,6 +134,43 @@ void udp_smd(int *sock,struct sockaddr_in faddr,struct cnf *conf,std::string mfn
 	}
 }
 
+void udp_smfs(int *sock,struct sockaddr_in faddr,struct cnf *conf,std::string mfn)
+{
+	std::ifstream file(std::string(conf->dmp)+'/'+mfn,std::ios::binary);
+	if (file.is_open())
+	{
+		file.seekg(0,std::ios::end);
+		size_t fs=file.tellg();
+		file.seekg(0,std::ios::beg);
+		file.close();
+		sendto(*sock,&fs,sizeof(fs),0,(struct sockaddr*)&faddr,sizeof(faddr));
+		std::cout<<"\"gmfs\" sended\n";
+	}
+}
+
+void udp_smdp(int *sock,struct sockaddr_in faddr,struct cnf *conf,std::string mfn,unsigned int sp,unsigned short sfr)
+{
+	std::ifstream file(std::string(conf->dmp)+'/'+mfn,std::ios::binary);
+	if (file.is_open())
+	{
+		file.seekg(sp,std::ios::beg);
+		char *bfs=(char*)malloc(sfr);
+		file.read(reinterpret_cast<char*>(bfs),sfr);
+		file.close();
+		size_t crp=0;
+		while (crp<sfr)
+		{
+			unsigned char rbfs[1030];
+			*(unsigned int*)rbfs=crp+sp;
+			if ((crp+1024)<sfr){*(unsigned short*)(rbfs+4)=1024;memcpy(&rbfs[6],&bfs[crp],1024);sendto(*sock,rbfs,1030,0,(struct sockaddr*)&faddr,sizeof(faddr));crp+=1024;}
+			else{*(unsigned short*)(rbfs+4)=sfr-crp;memcpy(&rbfs[6],&bfs[crp],sfr-crp);sendto(*sock,rbfs,6+sfr-crp,0,(struct sockaddr*)&faddr,sizeof(faddr));crp+=sfr-crp;}
+		}
+		free(bfs);
+		unsigned short mgfer=0xe3dd;sendto(*sock,&mgfer,2,0,(struct sockaddr*)&faddr,sizeof(faddr));
+		std::cout<<"\"md\" sended\n";
+	}
+}
+
 void udp_lsconn(int *sock,struct cnf *conf)
 {
 	struct sockaddr_in faddr;
@@ -219,10 +182,13 @@ void udp_lsconn(int *sock,struct cnf *conf)
 			char mgc[1500];
 			int sb=recvfrom(*sock,&mgc,sizeof(mgc),0,(struct sockaddr*)&faddr,&ips);
 			if (sb==2 && *(unsigned short*)mgc==0xa1b3){std::thread(udp_smlist,sock,faddr,conf).detach();std::cout<<"get UDP \"mlist\" request\n";}
-			if (sb>2 && *(unsigned short*)mgc==0x6e9d){std::thread(udp_smd,sock,faddr,conf,std::string(&mgc[2],sb-2)).detach();std::cout<<"get UDP \"gmd\" request\n";}
+			if (sb>2 && *(unsigned short*)mgc==0x6e9d){std::thread(udp_smdp,sock,faddr,conf,std::string(&mgc[2],sb-8),*(unsigned int*)(mgc+(sb-6)),*(unsigned short*)(mgc+(sb-2))).detach();std::cout<<"get UDP \"gmd\" request\n";}
+			if (sb>2 && *(unsigned short*)mgc==0x65f1){std::thread(udp_smfs,sock,faddr,conf,std::string(&mgc[2],sb-2)).detach();std::cout<<"get UDP \"gmfs\" request\n";}
+			if (sb>2 && *(unsigned short*)mgc==0x6ebd){std::thread(udp_smd,sock,faddr,conf,std::string(&mgc[2],sb-2)).detach();std::cout<<"get UDP \"gmd\" request\n";}
 		}
 		catch(std::exception &e){std::cout<<"Error: "<<e.what()<<std::endl;}
 	}
+	
 }
 
 int main()

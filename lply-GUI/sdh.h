@@ -18,3 +18,9 @@ void glssa(SDL_Renderer *ren,unsigned int win_width,unsigned int win_height,unsi
 		SDL_Delay(delay);
 	}
 }
+/*
+void dcml(SDL_Renderer *ren,unsigned char font_size,unsigned short y)
+{
+	if (y<1){y=1;}
+	printc('<',font_size,255,255,255,ren,win_width-24*font_size,mlisti*(14*font_size));printc('-',font_size,255,255,255,ren,win_width-12*font_size,mlisti*(14*font_size));
+}*/

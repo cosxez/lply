@@ -24,16 +24,14 @@ short lply_sbatt(int *sock,struct sockaddr_in *addr,struct sockaddr_in *faddr,st
 	return 0;
 }
 
-int lply_read(int *sock,struct sockaddr_in *faddr,void* pbuff,size_t sbuff)
+int lply_read(int *sock,struct sockaddr_in *faddr,void* pbuff,size_t sbuff,int flags=0)
 {
 	struct sockaddr_in ffaddr;
 	socklen_t ips=sizeof(ffaddr);
 	int sb=-1;
-	for (unsigned short i=0;i<32;i++)
-	{
-		sb=recvfrom(*sock,pbuff,sbuff,0,(struct sockaddr*)&ffaddr,&ips);
-		if (sb>0 && ffaddr.sin_addr.s_addr==faddr->sin_addr.s_addr){break;}
-	}
+	sb=recvfrom(*sock,pbuff,sbuff,flags,(struct sockaddr*)&ffaddr,&ips);
+	if (sb>0 && ffaddr.sin_addr.s_addr==faddr->sin_addr.s_addr){return sb;}
+
 	unsigned short mgc_chk=*(unsigned short*)pbuff;
 	if (sb==2 && mgc_chk==0xe1dd){sb=-4;}
 	return sb;
@@ -111,6 +109,46 @@ void lply_rmdap(int *sock,struct sockaddr_in *faddr,void *pbuff,size_t sbuff,ma_
 	}
 	if (nfdwr==0){unsigned short yaya;if (lply_read(sock,faddr,&yaya,sizeof(yaya))<1){return;}}
 
+	*is_busy=0;
+	ma_decoder_init_memory(pbuff,sbuff,NULL,decoder);
+	ma_sound_init_from_data_source(eng,decoder,0,NULL,sound);
+	ma_sound_start(sound);
+}
+
+void lply_rmdaps(int *sock,struct sockaddr_in *faddr,void *pbuff,size_t sbuff,ma_engine *eng,ma_decoder *decoder,ma_sound *sound,char *is_busy,std::string sfb)
+{
+	if (ma_sound_is_playing(sound)){ma_sound_stop(sound);}
+	ma_sound_uninit(sound);
+	ma_decoder_uninit(decoder);
+
+	size_t crp=0;
+	*is_busy=1;
+	
+	unsigned char bfgmd[8+sfb.size()];
+	*(unsigned short*)bfgmd=0x6e9d;
+	memcpy(&bfgmd[2],sfb.data(),sfb.size());
+	while (crp<sbuff)
+	{
+		*(unsigned int*)(bfgmd+2+sfb.size())=crp;
+		if ((crp+65535)<=sbuff){*(unsigned short*)(bfgmd+6+sfb.size())=65535;}
+		else{*(unsigned short*)(bfgmd+6+sfb.size())=sbuff-crp;}
+
+		sendto(*sock,&bfgmd,sizeof(bfgmd),0,(struct sockaddr*)faddr,sizeof(*faddr));
+		size_t ccrp=0;
+		unsigned char nfdwr=0;
+		while (ccrp<*(unsigned short*)(bfgmd+6+sfb.size()))
+		{
+			unsigned char tb[*(unsigned short*)(bfgmd+6+sfb.size())];
+			size_t csb=lply_read(sock,faddr,&tb,sizeof(tb));
+			if (csb==2 && *(unsigned short*)tb==0xe3dd){nfdwr=1;break;}
+			if (*(unsigned int*)tb + *(unsigned short*)(tb+4)<=sbuff){memcpy(((char*)(pbuff) + *(unsigned int*)tb),&tb[6],*(unsigned short*)(tb+4));}
+			if (csb<1){return;}
+			ccrp+=*(unsigned short*)(tb+4);
+		}
+		if (nfdwr==1){continue;}
+		if (nfdwr==0){unsigned short yaya;if (lply_read(sock,faddr,&yaya,2)<1){return;}}
+		crp+=ccrp;
+	}
 	*is_busy=0;
 	ma_decoder_init_memory(pbuff,sbuff,NULL,decoder);
 	ma_sound_init_from_data_source(eng,decoder,0,NULL,sound);
