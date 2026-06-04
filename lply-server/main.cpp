@@ -143,7 +143,8 @@ void udp_smfs(int *sock,struct sockaddr_in faddr,struct cnf *conf,std::string mf
 		size_t fs=file.tellg();
 		file.seekg(0,std::ios::beg);
 		file.close();
-		sendto(*sock,&fs,sizeof(fs),0,(struct sockaddr*)&faddr,sizeof(faddr));
+		char tbuff[10];*(unsigned short*)tbuff=0xa5f1;memcpy(&tbuff[2],&fs,8);
+		sendto(*sock,&tbuff,10,0,(struct sockaddr*)&faddr,sizeof(faddr));
 		std::cout<<"\"gmfs\" sended\n";
 	}
 }

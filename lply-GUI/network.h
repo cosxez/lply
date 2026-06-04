@@ -91,7 +91,7 @@ void lply_lg(int *sock,struct sockaddr_in *faddr,char *is_g,void *pbuff, size_t 
 	if (ffaddr.sin_addr.s_addr==faddr->sin_addr.s_addr){*is_g=1;}
 }
 
-void lply_rmdap(int *sock,struct sockaddr_in *faddr,void *pbuff,size_t sbuff,ma_engine *eng,ma_decoder *decoder,ma_sound *sound,char *is_busy)
+void lply_rmdap(int *sock,struct sockaddr_in *faddr,void *pbuff,size_t sbuff,ma_engine *eng,ma_decoder *decoder,ma_sound *sound,char *is_busy,unsigned long long int *mcp)
 {
 	if (ma_sound_is_playing(sound)){ma_sound_stop(sound);}
 	ma_sound_uninit(sound);
@@ -112,10 +112,11 @@ void lply_rmdap(int *sock,struct sockaddr_in *faddr,void *pbuff,size_t sbuff,ma_
 	*is_busy=0;
 	ma_decoder_init_memory(pbuff,sbuff,NULL,decoder);
 	ma_sound_init_from_data_source(eng,decoder,0,NULL,sound);
+	ma_data_source_get_length_in_pcm_frames(ma_sound_get_data_source(sound),mcp);
 	ma_sound_start(sound);
 }
 
-void lply_rmdaps(int *sock,struct sockaddr_in *faddr,void *pbuff,size_t sbuff,ma_engine *eng,ma_decoder *decoder,ma_sound *sound,char *is_busy,std::string sfb)
+void lply_rmdaps(int *sock,struct sockaddr_in *faddr,void *pbuff,size_t sbuff,ma_engine *eng,ma_decoder *decoder,ma_sound *sound,char *is_busy,std::string sfb,unsigned long long int *mcp)
 {
 	if (ma_sound_is_playing(sound)){ma_sound_stop(sound);}
 	ma_sound_uninit(sound);
@@ -140,17 +141,18 @@ void lply_rmdaps(int *sock,struct sockaddr_in *faddr,void *pbuff,size_t sbuff,ma
 		{
 			unsigned char tb[*(unsigned short*)(bfgmd+6+sfb.size())];
 			size_t csb=lply_read(sock,faddr,&tb,sizeof(tb));
+			if (csb<1){*is_busy=0;return;}
 			if (csb==2 && *(unsigned short*)tb==0xe3dd){nfdwr=1;break;}
 			if (*(unsigned int*)tb + *(unsigned short*)(tb+4)<=sbuff){memcpy(((char*)(pbuff) + *(unsigned int*)tb),&tb[6],*(unsigned short*)(tb+4));}
-			if (csb<1){return;}
 			ccrp+=*(unsigned short*)(tb+4);
 		}
 		if (nfdwr==1){continue;}
-		if (nfdwr==0){unsigned short yaya;if (lply_read(sock,faddr,&yaya,2)<1){return;}}
+		if (nfdwr==0){unsigned short yaya;if (lply_read(sock,faddr,&yaya,2)<1){*is_busy=0;return;}}
 		crp+=ccrp;
 	}
 	*is_busy=0;
 	ma_decoder_init_memory(pbuff,sbuff,NULL,decoder);
 	ma_sound_init_from_data_source(eng,decoder,0,NULL,sound);
+	ma_data_source_get_length_in_pcm_frames(ma_sound_get_data_source(sound),mcp);
 	ma_sound_start(sound);
 }

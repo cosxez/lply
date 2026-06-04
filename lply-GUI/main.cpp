@@ -1,6 +1,8 @@
 #define MINIAUDIO_IMPLEMENTATION
 
-#include <iostream>
+#define END_NEXT 0
+#define END_REPLAY 1
+#define END_STOP 2
 
 #include "miniaudio.h"
 #include <SDL2/SDL.h>
@@ -16,6 +18,7 @@
 #include "sdh.h"
 #include "network.h"
 #include "font.h"
+#include "sound.h"
 
 int main(int args,char* argv[])
 {	
@@ -114,7 +117,7 @@ int main(int args,char* argv[])
 	std::vector<std::vector<unsigned char>> tmv;
 //	std::vector<unsigned char> mbuff;
 
-	size_t mbuffs=0;
+	unsigned long long int mcp=0;
 	char* mbuff=nullptr;
 
 	ma_engine eng;
@@ -126,6 +129,8 @@ int main(int args,char* argv[])
 	float cv=0.5;
 	ma_engine_set_volume(&eng,cv);
 	char is_busy=0;
+
+	char l_mode=END_REPLAY;
 	while (run)
 	{
 		SDL_RenderCopy(ren,btex,NULL,NULL);
@@ -137,12 +142,15 @@ int main(int args,char* argv[])
 		while (SDL_PollEvent(&ev))
 		{
 			if (ev.type==SDL_QUIT){run=0;}
+			if (ev.type==SDL_KEYDOWN && (ev.key.keysym.mod & KMOD_ALT)!=0 && ev.key.keysym.sym==SDLK_UP){if ((cv+0.05)<=1){cv+=0.05;ma_engine_set_volume(&eng,cv);break;}}
+			if (ev.type==SDL_KEYDOWN && (ev.key.keysym.mod & KMOD_ALT)!=0 && ev.key.keysym.sym==SDLK_DOWN){if ((cv-0.05)>=0){cv-=0.05;ma_engine_set_volume(&eng,cv);break;}}
+
 			if (ev.type==SDL_KEYDOWN && ev.key.keysym.sym==SDLK_UP){if (mlistio>0 && ((mlisti+2)*(14*font_size)==(3*(14*font_size)))){mlistio-=1;break;}if ((mlisti+mlistio)>1){mlisti-=1;break;}}
 			if (ev.type==SDL_KEYDOWN && ev.key.keysym.sym==SDLK_DOWN){if ((mlisti+mlistio)<mvec.size() && ((mlisti+2)*(14*font_size)<win_height)){mlisti+=1;break;}if ((mlisti+mlistio)<mvec.size() && ((mlisti+2)*(14*font_size)>=win_height)){mlistio+=1;break;}}
 			
-			if (ev.type==SDL_KEYDOWN && ev.key.keysym.sym==SDLK_RIGHT){if ((cv+0.05)<=1){cv+=0.05;ma_engine_set_volume(&eng,cv);}}
-			if (ev.type==SDL_KEYDOWN && ev.key.keysym.sym==SDLK_LEFT){if ((cv-0.05)>=0){cv-=0.05;ma_engine_set_volume(&eng,cv);}}
-			if (ev.type==SDL_KEYDOWN && ev.key.keysym.sym==SDLK_SPACE && ev.key.repeat==0){if (ma_sound_is_playing(&sound)){ma_sound_stop(&sound);break;}if (!ma_sound_is_playing(&sound)){ma_sound_start(&sound);break;}}
+			if (ev.type==SDL_KEYDOWN && ev.key.keysym.sym==SDLK_RIGHT){lply_mttit(&eng,&sound,5,mcp,l_mode);}
+			if (ev.type==SDL_KEYDOWN && ev.key.keysym.sym==SDLK_LEFT){lply_mttit(&eng,&sound,-5,mcp);}
+			if (ev.type==SDL_KEYDOWN && ev.key.keysym.sym==SDLK_SPACE){if (ma_sound_is_playing(&sound)){ma_sound_stop(&sound);break;}if (!ma_sound_is_playing(&sound)){ma_sound_start(&sound);break;}}
 			if (ev.type==SDL_KEYDOWN && ev.key.keysym.sym==SDLK_RETURN && ev.key.repeat==0)
 			{
 				unsigned int smli=0;
@@ -176,19 +184,23 @@ int main(int args,char* argv[])
 					*(unsigned short*)bfgmd=0x65f1;
 					memcpy(&bfgmd[2],sfb.data(),sfb.size());
 
-					sendto(sock,&bfgmd,sizeof(bfgmd),0,(struct sockaddr*)&faddr,sizeof(faddr));
+					//sendto(sock,&bfgmd,sizeof(bfgmd),0,(struct sockaddr*)&faddr,sizeof(faddr));
 					size_t bsfm;
-					while (1)
+					for (unsigned char i=0;i<32;i++)
 					{
-						if (lply_read(&sock,&faddr,&bsfm,sizeof(bsfm),MSG_DONTWAIT)==8){break;}
+						sendto(sock,&bfgmd,sizeof(bfgmd),0,(struct sockaddr*)&faddr,sizeof(faddr));
+						std::this_thread::sleep_for(std::chrono::milliseconds(500));
+						char tbuff[10];
+						if (lply_read(&sock,&faddr,&tbuff,sizeof(tbuff),MSG_DONTWAIT)==10 && *(unsigned short*)tbuff==0xa5f1){memcpy(&bsfm,&tbuff[2],8);break;}
+						if (i==31){return -322;}
 					}
 					mbuff=(char*)malloc(bsfm);	
 				//	char* tmp=(char*)realloc(mbuff,bsfm);
 				//	mbuff=tmp;mbuffs=bsfm;
 				//	mbuff.resize(bsfm);
 					
-					if (conf.with_s='y'){std::thread(lply_rmdaps,&sock,&faddr,mbuff,bsfm,&eng,&decoder,&sound,&is_busy,sfb).detach();}
-					else{std::thread(lply_rmdap,&sock,&faddr,mbuff,bsfm,&eng,&decoder,&sound,&is_busy).detach();}
+					if (conf.with_s='y'){std::thread(lply_rmdaps,&sock,&faddr,mbuff,bsfm,&eng,&decoder,&sound,&is_busy,sfb,&mcp).detach();}
+					else{std::thread(lply_rmdap,&sock,&faddr,mbuff,bsfm,&eng,&decoder,&sound,&is_busy,&mcp).detach();}
 					
 					continue;
 				}
