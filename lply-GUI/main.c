@@ -18,7 +18,5 @@ int main()
 	struct cnf conf;
 	if (cfg_pars(&conf)!=0){return -1;}
 	
-	printf("%s\n",conf.ip);
-	printf("%d\n",conf.port);
 	return 0;
 }

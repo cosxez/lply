@@ -21,12 +21,13 @@ char cfg_pars(struct cnf* conf)
 		while (rss!=-1)
 		{
 			rss=getline(&cl,&cls,file);
+			if (rss==-1){break;}
 			for (int i=0;i<rss;i++)
 			{
 				if (cl[i]==' ' || cl[i]=='=')
 				{
 					arg=(char*)malloc(i);
-					memcpy(arg,cl,i);
+					memcpy(arg,cl,i);arg[i]='\0';
 					break;
 				}
 			}
@@ -34,8 +35,8 @@ char cfg_pars(struct cnf* conf)
 			{
 				if (cl[i]==' ' || cl[i]=='=')
 				{
-					pr=(char*)malloc(rss-i-1);
-					memcpy(pr,cl+i+1,rss-i-1);
+					pr=(char*)malloc(rss-i-2);
+					memcpy(pr,cl+i+1,rss-i-2);
 					prs=rss-i-2;
 					break;
 				}
@@ -50,9 +51,9 @@ char cfg_pars(struct cnf* conf)
 			{
 				conf->port=atoi(pr);
 			}
+			free(pr);
+			free(arg);
 		}
-		free(pr);
-		free(arg);
 		free(cl);
 		fclose(file);
 		return 0;
