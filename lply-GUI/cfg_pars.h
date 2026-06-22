@@ -2,9 +2,12 @@
 
 struct cnf
 {
+	char bgi[511];
 	char ip[128];
 	unsigned short port;
-}__attribute__((packed));
+	char thie;
+	char wm;
+};
 
 char cfg_pars(struct cnf* conf)
 {
@@ -46,11 +49,17 @@ char cfg_pars(struct cnf* conf)
 				memcpy(conf->ip,pr,prs);
 				conf->ip[prs]='\0';
 			}
-			
 			if (strcmp(arg,"port")==0)
 			{
 				conf->port=atoi(pr);
 			}
+			if (strcmp(arg,"theme-file")==0)
+			{
+				memcpy(conf->bgi,pr,prs);
+				conf->bgi[prs]='\0';
+				conf->thie=1;
+			}
+			if (strcmp(arg,""))
 			free(pr);
 			free(arg);
 		}
