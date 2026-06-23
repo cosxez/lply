@@ -2,7 +2,8 @@
 
 struct cnf
 {
-	char bgi[511];
+	char bgi[512];
+	char lmd[512];
 	char ip[128];
 	unsigned short port;
 	char thie;
@@ -44,6 +45,7 @@ char cfg_pars(struct cnf* conf)
 					break;
 				}
 			}
+			if (arg==NULL||pr==NULL){continue;}
 			if (strcmp(arg,"ip")==0)
 			{
 				memcpy(conf->ip,pr,prs);
@@ -59,10 +61,23 @@ char cfg_pars(struct cnf* conf)
 				conf->bgi[prs]='\0';
 				conf->thie=1;
 			}
-			if (strcmp(arg,""))
+			if (strcmp(arg,"lm-dir")==0)
+			{
+				memcpy(conf->lmd,pr,prs);
+				conf->lmd[prs]='\0';
+			}
+			if (strcmp(arg,"work-mode")==0)
+			{
+				if (strcmp(pr,"no")==0){conf->wm=1;}
+				if (strcmp(pr,"lo")==0){conf->wm=2;}
+				if (strcmp(pr,"uv")==0){conf->wm=0;}
+			}
 			free(pr);
+			pr=NULL;
 			free(arg);
+			arg=NULL;
 		}
+		if (pr!=NULL){free(pr);}if (arg!=NULL){free(arg);}
 		free(cl);
 		fclose(file);
 		return 0;

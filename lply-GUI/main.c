@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <dirent.h>
 #include <unistd.h>
 
 #include <SDL2/SDL.h>
@@ -14,11 +15,28 @@
 #include "cfg_pars.h"
 #include "fwwt.h"
 #include "display.h"
+#include "network.h"
+#include "sound.h"
+#include "lmdr.h"
 
 int main()
 {
-	struct cnf conf;conf.thie=0;
+	struct cnf conf;conf.thie=0;conf.wm=0;
 	if (cfg_pars(&conf)!=0){return -1;}
+	
+	int sock=-1;struct sockaddr_in addr;struct sockaddr_in faddr;
+	
+	char nstate=0;
+	char lstate=0;
+	if (conf.wm==0)
+	{
+		if (lply_sbatt(&sock,&addr,&faddr,conf.ip,conf.port)!=0){sclose(&sock);nstate=0;}
+		else{nstate=1;}
+		if (lply_sbl(conf.lmd)!=0){lstate=0;}
+		else{lstate=1;}
+	}
+	if (conf.wm==1){if (lply_sbatt(&sock,&addr,&faddr,conf.ip,conf.port)!=0){sclose(&sock);nstate=0;}else{nstate=1;}}
+	if (conf.wm==2){if (lply_sbl(conf.lmd)!=0){lstate=0;}else{lstate=1;}}
 	
 	int win_width=864;
 	int win_height=576;
@@ -31,8 +49,8 @@ int main()
 	
 	unsigned char *bfbg=NULL;
 	unsigned char *bff=NULL;
-	if (lply_sthm(&conf,&bfbg,&bff)!=0){return -2;}
-	
+	unsigned int bffs;
+	if (lply_sthm(conf.bgi,conf.thie,&bfbg,&bff,&bffs)!=0){return -2;}
 	SDL_Texture *btex=NULL;btex=SDL_CreateTexture(ren,SDL_PIXELFORMAT_RGB24,SDL_TEXTUREACCESS_STREAMING,*(unsigned int*)bfbg,*(unsigned int*)(bfbg+4));
 	lply_sa(ren,btex,bfbg);
 	
@@ -43,9 +61,11 @@ int main()
 			if (ev.type==SDL_QUIT){run=0;}
 		}
 		SDL_RenderCopy(ren,btex,NULL,NULL);
+		
 		SDL_RenderPresent(ren);
 		SDL_Delay(20);
 	}
+	sclose(&sock);
 	free(bfbg);
 	free(bff);
 	SDL_DestroyTexture(btex);
