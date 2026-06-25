@@ -1,17 +1,5 @@
 #pragma once
 
-struct fcamn
-{
-	unsigned short mg;
-	char ch;
-}__attribute__((packed));
-
-struct dbs
-{
-	char nstate;
-	char lstate;
-};
-
 const struct fcamn fmcl[] =
 {
     {0xB300, ' '}, {0xB301, '!'}, {0xB302, '"'}, {0xB303, '#'},

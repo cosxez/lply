@@ -14,6 +14,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
+#include "structf.h"
 #include "cfg_pars.h"
 #include "fwwt.h"
 #include "display.h"

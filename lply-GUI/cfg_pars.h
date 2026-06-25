@@ -1,15 +1,5 @@
 #pragma once
 
-struct cnf
-{
-	char bgi[512];
-	char lmd[512];
-	char ip[128];
-	unsigned short port;
-	char thie;
-	char wm;
-};
-
 char cfg_pars(struct cnf* conf)
 {
 	FILE *file=fopen("config","r");
