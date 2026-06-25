@@ -1,4 +1,4 @@
-#pragma onc
+#pragma once
 
 void sclose(int *sock)
 {

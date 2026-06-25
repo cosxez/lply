@@ -6,6 +6,12 @@ struct fcamn
 	char ch;
 }__attribute__((packed));
 
+struct dbs
+{
+	char nstate;
+	char lstate;
+};
+
 const struct fcamn fmcl[] =
 {
     {0xB300, ' '}, {0xB301, '!'}, {0xB302, '"'}, {0xB303, '#'},
@@ -65,33 +71,37 @@ void lply_sa(SDL_Renderer *ren,SDL_Texture *btex,unsigned char *bgid)
 	}
 }
 
-void printc(char c,unsigned char font_size,unsigned char cr,unsigned char cg,unsigned cb,SDL_Renderer *ren,int x,int y,unsigned char* fd,unsigned int fcwqfs)
+void printc(char c,unsigned char font_size,unsigned char cr,unsigned char cg,unsigned cb,SDL_Renderer *ren,int x,int y,unsigned char* fd,unsigned int fcwqfs,unsigned short cmgc)
 {
-	unsigned short mgfc = 0;
-	for (unsigned int i = 0; i < sizeof(fmcl) / sizeof(fmcl[0]); i++)
+	unsigned short mgfc=0;
+	if (cmgc==0)
 	{
-		if (c == fmcl[i].ch)
+		for (unsigned int i = 0; i < sizeof(fmcl) / sizeof(fmcl[0]); i++)
 		{
-			mgfc = fmcl[i].mg;break;
+			if (c == fmcl[i].ch)
+			{
+				mgfc = fmcl[i].mg;break;
+			}
 		}
 	}
-	if (mgfc == 0){return;}
-
-	unsigned char *crp = fd;
-	while (*crp < fcwqfs)
+	else{mgfc=cmgc;}
+	if (mgfc==0){return;}
+	
+	for (unsigned int crp=0;crp<fcwqfs;crp++)
 	{
-		if (*(unsigned short*)crp == mgfc)
+		if (crp+3>fcwqfs){break;}
+		if (*(unsigned short*)(fd+crp) == mgfc)
 		{
 			crp += 2;
-			unsigned char lines = *crp;
+			unsigned char lines = fd[crp];
 			crp++;
 				
 			for (unsigned char l = 0; l < lines; l++)
 			{
-				unsigned char b1 = crp[0];
-				unsigned char b2 = crp[1];
+				unsigned char b1=fd[crp];
+				unsigned char b2=fd[crp+1];
+
 				crp += 2;
-	
 				int x1 = x + ((b1 >> 4) * font_size);
 				int y1 = y + ((b1 & 0xf) * font_size);
 				int x2 = x + ((b2 >> 4) * font_size);
@@ -101,6 +111,17 @@ void printc(char c,unsigned char font_size,unsigned char cr,unsigned char cg,uns
 			}	
 			return;
 		}
-		crp+=1;
 	}	
+}
+
+void printl(char* str,unsigned char font_size,unsigned char cr,unsigned char cg,unsigned char cb,SDL_Renderer* ren,int x,int y,unsigned char* fd,unsigned int fds)
+{
+	for (unsigned int i=0;str[i]!='\0';i++){if (str[i]=='\n'){y+=14*font_size;}printc(str[i],font_size,cr,cg,cb,ren,x,y,fd,fds,0);x+=12*font_size;}
+}
+
+void lply_debug(SDL_Renderer* ren,unsigned int win_width,unsigned char* bff,unsigned int bffs,unsigned char *sfb,unsigned int sfbs,struct dbs *des)
+{
+	for (unsigned int y=0;y<28;y++){SDL_SetRenderDrawColor(ren,0,0,0,255);SDL_RenderDrawLine(ren,0,y,win_width,y);}
+	printc('~',2,des->nstate==0 ? 255 : 0,des->nstate==1 ? 255 : 0,0,ren,win_width-win_width/100*20,0,sfb,sfbs,0x31f1);
+	printl("ld",1,des->lstate==0 ? 255 : 0,des->lstate==1 ? 255 : 0,0,ren,win_width-win_width/100*16,13,bff,bffs);
 }
