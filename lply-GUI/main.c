@@ -56,20 +56,22 @@ int main()
 	unsigned char *bff=NULL;
 	unsigned int bffs;
 	if (lply_sthm(conf.bgi,conf.thie,&bfbg,&bff,&bffs)!=0){return -2;}
-	SDL_Texture *btex=NULL;btex=SDL_CreateTexture(ren,SDL_PIXELFORMAT_RGB24,SDL_TEXTUREACCESS_STREAMING,*(unsigned int*)bfbg,*(unsigned int*)(bfbg+4));
+	SDL_Texture *btex=NULL;btex=SDL_CreateTexture(ren,SDL_PIXELFORMAT_RGB24,SDL_TEXTUREACCESS_STREAMING,*(unsigned int*)bfbg,*(unsigned int*)(bfbg+4));unsigned int tex_width=*(unsigned int*)bfbg;unsigned int tex_height=*(unsigned int*)(bfbg+4);
 	lply_sa(ren,btex,bfbg);
 	
 	unsigned char sfb[]={0xf1,0x31,0x05,0x7b,0x8b,0x58,0x87,0x87,0xa8,0x85,0x46,0x85,0xb6};
 	unsigned char font_size=1;
 
 	char idb=0;
+	char lobg=0;
 	while (run)
 	{
 		while(SDL_PollEvent(&ev))
 		{
 			if (ev.type==SDL_QUIT){run=0;}
 			if (ev.type==SDL_KEYDOWN &&ev.key.keysym.sym==SDLK_d){if (idb==0){idb=1;break;}idb=0;}
-			if (ev.type==SDL_KEYDOWN &&ev.key.keysym.sym==SDLK_s){}
+			if (ev.type==SDL_KEYDOWN &&ev.key.keysym.sym==SDLK_KP_PLUS){if (lobg>=0){break;}unsigned char* px;int pitch=0;if(SDL_LockTexture(btex,NULL,(void**)&px,&pitch)==0){for (unsigned int i=0;i<=tex_width*tex_height*3;i++){px[i]=px[i]*2;}SDL_UnlockTexture(btex);lobg+=1;}}
+			if (ev.type==SDL_KEYDOWN &&ev.key.keysym.sym==SDLK_KP_MINUS){if (lobg<=-5){break;}unsigned char* px;int pitch=0;if (SDL_LockTexture(btex,NULL,(void**)&px,&pitch)==0){for (unsigned int i=0;i<=tex_width*tex_height*3;i++){px[i]=px[i]/2;}SDL_UnlockTexture(btex);lobg-=1;}}
 		}
 		SDL_RenderCopy(ren,btex,NULL,NULL);
 		

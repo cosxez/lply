@@ -31,7 +31,7 @@ char cfg_pars(struct cnf* conf)
 				{
 					pr=(char*)malloc(rss-i-2);
 					memcpy(pr,cl+i+1,rss-i-2);
-					prs=rss-i-2;
+					prs=rss-i-2;pr[prs]='\0';
 					break;
 				}
 			}
