@@ -104,7 +104,8 @@ void printc(char c,unsigned char font_size,unsigned char cr,unsigned char cg,uns
 
 void printl(char* str,unsigned char font_size,unsigned char cr,unsigned char cg,unsigned char cb,SDL_Renderer* ren,int x,int y,unsigned char* fd,unsigned int fds)
 {
-	for (unsigned int i=0;str[i]!='\0';i++){if (str[i]=='\n'){y+=14*font_size;}printc(str[i],font_size,cr,cg,cb,ren,x,y,fd,fds,0);x+=12*font_size;}
+	int sx=x;
+	for (unsigned int i=0;str[i]!='\0';i++){if (str[i]=='\n'){y+=14*font_size;x=sx;continue;}printc(str[i],font_size,cr,cg,cb,ren,x,y,fd,fds,0);x+=12*font_size;}
 }
 
 void lply_debug(SDL_Renderer* ren,unsigned int win_width,unsigned char* bff,unsigned int bffs,unsigned char *sfb,unsigned int sfbs,struct dbs *des)
@@ -112,4 +113,12 @@ void lply_debug(SDL_Renderer* ren,unsigned int win_width,unsigned char* bff,unsi
 	for (unsigned int y=0;y<28;y++){SDL_SetRenderDrawColor(ren,0,0,0,255);SDL_RenderDrawLine(ren,0,y,win_width,y);}
 	printc('~',2,des->nstate==0 ? 255 : 0,des->nstate==1 ? 255 : 0,0,ren,win_width-win_width/100*20,0,sfb,sfbs,0x31f1);
 	printl("ld",1,des->lstate==0 ? 255 : 0,des->lstate==1 ? 255 : 0,0,ren,win_width-win_width/100*16,13,bff,bffs);
+}
+
+void lply_drawc(SDL_Renderer *ren,unsigned char font_size,int win_width,int win_height,unsigned int mlisti,unsigned char* bff,unsigned int bffs)
+{
+	SDL_SetRenderDrawColor(ren,0,0,0,255);
+	SDL_RenderFillRect(ren,&(SDL_Rect){win_width-24*font_size,0,win_width,win_height});
+	printc('<',1,255,255,255,ren,win_width-24*font_size,mlisti*(14*font_size),bff,bffs,0);
+	printc('-',1,255,255,255,ren,win_width-12*font_size,mlisti*(14*font_size),bff,bffs,0);
 }

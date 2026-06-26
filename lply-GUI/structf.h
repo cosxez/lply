@@ -8,6 +8,7 @@ struct cnf
 	unsigned short port;
 	char thie;
 	char wm;
+	unsigned char tc[3];
 };
 
 struct fcamn

@@ -7,3 +7,72 @@ char lply_sbl(char* path)
 	closedir(dir);
 	return 0;
 }
+
+void lply_gmlfld(char **str,unsigned int *strs,unsigned int *stri,char **fn,unsigned int *fs,unsigned int *fi,char* path)
+{
+	DIR *dir=opendir(path);
+	if (dir==NULL){return;}
+	FILE *file=NULL;
+
+	struct dirent *cf;
+	
+	char pathff[512];
+
+	unsigned int fns=0;
+	unsigned int sns=0;
+	while ((cf=readdir(dir))!=NULL)
+	{
+		if (strcmp(cf->d_name,".")==0 || strcmp(cf->d_name,"..")==0){continue;}
+
+		snprintf(pathff,511,"%s%s",path,cf->d_name);
+		file=fopen(pathff,"r");
+		if (file==NULL){continue;}
+
+		unsigned int mgc;fread(&mgc,4,1,file);
+		if (mgc==0xe0f1a4b3)
+		{
+			unsigned short fsns;
+			fread(&fsns,2,1,file);sns+=fsns+1;
+		}
+		else{sns+=strlen(cf->d_name)+1;}
+		fclose(file);file=NULL;
+		
+		fns+=strlen(cf->d_name)+1;
+
+		*stri+=1;*fi+=1;
+	}
+	rewinddir(dir);
+
+	*fn=(char*)malloc(fns);if (fn==NULL){printf("fn\n");}
+	*str=(char*)malloc(sns);if (str==NULL){printf("str\n");}
+
+	unsigned int cp=0;
+	unsigned int ncp=0;
+	while ((cf=readdir(dir))!=NULL)
+	{
+		if (strcmp(cf->d_name,".")==0 || strcmp(cf->d_name,"..")==0){continue;}
+		
+		snprintf(pathff,511,"%s%s",path,cf->d_name);
+		file=fopen(pathff,"r");
+		if (file==NULL){continue;}
+		
+		unsigned int mgc;fread(&mgc,4,1,file);
+		if (mgc==0xe0f1a4b3)
+		{
+			unsigned short fsns;
+			fread(&fsns,2,1,file);fread(&((*str)[ncp]),fsns,1,file);ncp+=fsns;(*str)[ncp]='\n';ncp+=1;
+		}
+		else{memcpy(&(*str)[ncp],cf->d_name,strlen(cf->d_name));ncp+=strlen(cf->d_name);(*str)[ncp]='\n';ncp+=1;}
+		fclose(file);file=NULL;
+
+		memcpy(&(*fn)[cp],cf->d_name,strlen(cf->d_name));cp+=strlen(cf->d_name);(*fn)[cp]='\n';cp+=1;
+	}
+	(*fn)[cp-1]='\0';
+	(*str)[ncp-1]='\0';
+
+	if (file!=NULL){fclose(file);}
+	closedir(dir);
+	
+	*strs=sns;
+	*fs=fns;
+}

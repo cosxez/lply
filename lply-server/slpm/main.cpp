@@ -51,6 +51,8 @@ int main()
 	std::ofstream file(on,std::ios::binary);
 	unsigned short sns=sn.size();
 	std::cout<<sns<<std::endl;
+	unsigned int mgc=0xe0f1a4b3;
+	file.write(reinterpret_cast<const char*>(&mgc),4);
 	file.write(reinterpret_cast<const char*>(&sns),2);file.write(reinterpret_cast<const char*>(sn.data()),sns);
 	/*unsigned int imgds=imgd.size();
 	std::cout<<imgds<<std::endl;

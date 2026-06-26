@@ -54,13 +54,26 @@ char cfg_pars(struct cnf* conf)
 			if (strcmp(arg,"lm-dir")==0)
 			{
 				memcpy(conf->lmd,pr,prs);
-				conf->lmd[prs]='\0';
+				if (pr[prs-1]=='/'){conf->lmd[prs]='\0';continue;}
+				conf->lmd[prs]='/';conf->lmd[prs+1]='\0';
 			}
 			if (strcmp(arg,"work-mode")==0)
 			{
 				if (strcmp(pr,"no")==0){conf->wm=1;}
 				if (strcmp(pr,"lo")==0){conf->wm=2;}
 				if (strcmp(pr,"uv")==0){conf->wm=0;}
+			}
+			if (strcmp(arg,"text-color-red")==0)
+			{
+				conf->tc[0]=(unsigned char)atoi(pr);
+			}
+			if (strcmp(arg,"text-color-green")==0)
+			{
+				conf->tc[1]=(unsigned char)atoi(pr);
+			}
+			if (strcmp(arg,"text-color-blue")==0)
+			{
+				conf->tc[2]=(unsigned char)atoi(pr);
 			}
 			free(pr);
 			pr=NULL;
