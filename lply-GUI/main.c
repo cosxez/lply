@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <dirent.h>
 #include <string.h>
-#include <pthread.h>
+#include <threads.h>
 #include <unistd.h>
 
 #include <SDL2/SDL.h>
@@ -19,15 +19,15 @@
 #include "fwwt.h"
 #include "display.h"
 #include "network.h"
-#include "sound.h"
 #include "lmdr.h"
+#include "sound.h"
 
 int main()
 {
 	struct cnf conf;conf.thie=0;conf.wm=0;memset(&(conf.tc),0,3);
 	if (cfg_pars(&conf)!=0){return -1;}
 	
-	int sock=-1;struct sockaddr_in addr;struct sockaddr_in faddr;
+	int sock=-1;struct sockaddr_in addr;struct sockaddr_in faddr;memset(&addr,0,sizeof(addr));memset(&faddr,0,sizeof(faddr));
 	
 	struct dbs debug_struct;
 	debug_struct.nstate=0;
@@ -64,48 +64,78 @@ int main()
 
 	char *nmlist=NULL;unsigned int nmlists=0;unsigned int tnmi=0;
 	char *nflist=NULL;unsigned int nflists=0;unsigned int tnfi=0;
-	if (debug_struct.nstate==1){}
+	if (debug_struct.nstate==1){if (lply_gmlfls(&sock,&faddr,&nmlist,&nmlists,&tnmi,&nflist,&nflists,&tnfi)!=0){debug_struct.nstate=0;}}
 
 	char *lmlist=NULL;unsigned int lmlists=0;unsigned int tlmi=0;
 	char *lflist=NULL;unsigned int lflists=0;unsigned int tlfi=0;
 	if (debug_struct.lstate==1){lply_gmlfld(&lmlist,&lmlists,&tlmi,&lflist,&lflists,&tlfi,conf.lmd);}
 	
 	char *gmlist=NULL;unsigned int gmlists=0;unsigned int tgmi=0;gmlists=lmlists+nmlists;tgmi=tlmi+tnmi;gmlist=(char*)malloc(gmlists);if (lmlist!=NULL && lmlists>0){memcpy(gmlist,lmlist,lmlists);}if (nmlist!=NULL && nmlists>0){memcpy(&gmlist[lmlists],nmlist,nmlists);}
-	char *gflist=NULL;unsigned int gflists=0;unsigned int tgfi=0;
-
+	char *gflist=NULL;unsigned int gflists=0;unsigned int tgfi=0;gflists=lflists+nflists;tgfi=tlfi+tnfi;gflist=(char*)malloc(gflists);if (lflist!=NULL && lflists>0){memcpy(gflist,lflist,lflists);}if (nflist!=NULL && nflists>0){memcpy(&gflist[lflists],nflist,nflists);}
+	
 	unsigned int mlisti=1;unsigned int mlistio=0;
-
+	
 	ma_engine eng;
 	ma_engine_init(NULL,&eng);
 	ma_decoder decoder={0};
 	ma_sound sound={0};
+	unsigned long long int mcp=0;
+
+	unsigned char* mbuff=NULL;
+	unsigned int sbuff=0;
+
+	float cv=0.5;
+	ma_engine_set_volume(&eng,cv);
 
 	char idb=0;
 	char lobg=0;
-	char cur_opp=0;
+	char is_busy=0;
+	char cur_opp=0;if (debug_struct.lstate==0 && debug_struct.nstate==0){cur_opp=-1;}
+
 	while (run)
 	{
 		while(SDL_PollEvent(&ev))
 		{
 			if (ev.type==SDL_QUIT){run=0;}
-			
+
+			if (ev.type==SDL_KEYDOWN && (ev.key.keysym.mod & KMOD_ALT)!=0 && ev.key.keysym.sym==SDLK_UP){if ((cv+0.05)<=1){cv+=0.05;ma_engine_set_volume(&eng,cv);break;}}
+			if (ev.type==SDL_KEYDOWN && (ev.key.keysym.mod & KMOD_ALT)!=0 && ev.key.keysym.sym==SDLK_DOWN){if ((cv-0.05)>=0){cv-=0.05;ma_engine_set_volume(&eng,cv);break;}}
+
 			if (ev.type==SDL_KEYDOWN && (ev.key.keysym.mod & KMOD_ALT)==0 && ev.key.keysym.sym==SDLK_UP){if (mlistio>0 && ((mlisti+2)*(14*font_size)==(3*(14*font_size)))){mlistio-=1;break;}if ((mlisti+mlistio)>1){mlisti-=1;break;}}
-			if (ev.type==SDL_KEYDOWN && (ev.key.keysym.mod & KMOD_ALT)==0 && ev.key.keysym.sym==SDLK_DOWN){if ((mlisti+mlistio)<tgmi && ((mlisti+2)*(14*font_size)<win_height)){mlisti+=1;break;}if ((mlisti+mlistio)<tgmi && ((mlisti+2)*(14*font_size)>=win_height)){mlistio+=1;break;}}
+			if (ev.type==SDL_KEYDOWN && (ev.key.keysym.mod & KMOD_ALT)==0 && ev.key.keysym.sym==SDLK_DOWN){if ((mlisti+mlistio)<tgmi && ((mlisti+1)*(14*font_size)<win_height)){mlisti+=1;break;}if ((mlisti+mlistio)<tgmi && ((mlisti+2)*(14*font_size)>=win_height)){mlistio+=1;break;}}
 			
 			if (ev.type==SDL_KEYDOWN &&ev.key.keysym.sym==SDLK_d){if (idb==0){idb=1;break;}idb=0;}
 			if (ev.type==SDL_KEYDOWN &&ev.key.keysym.sym==SDLK_KP_PLUS){if (lobg>=0){break;}unsigned char* px;int pitch=0;if(SDL_LockTexture(btex,NULL,(void**)&px,&pitch)==0){for (unsigned int i=0;i<=tex_width*tex_height*3;i++){px[i]=px[i]*2;}SDL_UnlockTexture(btex);lobg+=1;}}
 			if (ev.type==SDL_KEYDOWN &&ev.key.keysym.sym==SDLK_KP_MINUS){if (lobg<=-5){break;}unsigned char* px;int pitch=0;if (SDL_LockTexture(btex,NULL,(void**)&px,&pitch)==0){for (unsigned int i=0;i<=tex_width*tex_height*3;i++){px[i]=px[i]/2;}SDL_UnlockTexture(btex);lobg-=1;}}
+			if (ev.type==SDL_KEYDOWN && ev.key.keysym.sym==SDLK_SPACE &&ev.key.repeat==0){lply_posct(&sound);break;}
+			if (ev.type==SDL_KEYDOWN &&ev.key.keysym.sym==SDLK_RETURN &&ev.key.repeat==0 && is_busy==0){cur_opp=lply_capt(gmlist,gmlists,tgmi,tlmi,gflist,gflists,tgfi,mlisti,mlistio,&is_busy,conf.lmd,&mbuff,&sbuff,&eng,&decoder,&sound,&mcp,&sock,&faddr);}
 		}
-		SDL_RenderCopy(ren,btex,NULL,NULL);
+		if (cur_opp==-1){SDL_SetRenderDrawColor(ren,0,0,0,255);SDL_RenderClear(ren);printl("Error: nstate=0 & lstate=0",2,255,0,0,ren,win_width/2-12*2*13,win_height/2-14*2,bff,bffs);SDL_RenderPresent(ren);}
+		if (cur_opp==-2){SDL_SetRenderDrawColor(ren,0,0,0,255);SDL_RenderClear(ren);printl("Error: file was not open",2,255,0,0,ren,win_width/2-12*2*12,win_height/2-14*2,bff,bffs);}
+		
+		if (cur_opp==0)
+		{
+			SDL_RenderCopy(ren,btex,NULL,NULL);
 
-		lply_drawc(ren,font_size,win_width,win_height,mlisti-1,bff,bffs);	
+			lply_drawc(ren,font_size,win_width,win_height,mlisti-1,bff,bffs);
 
-		printl(gmlist,1,conf.tc[0],conf.tc[1],conf.tc[2],ren,0,0,bff,bffs);
+			/*for (unsigned int i=mlisti+mlistio-1;i<tgmi;i++)
+			{
+				if (ly>=(win_height-14*font_size)){break;}
+				if (lx<(win_width-24*font_size)){printc(gmlist[i],font_size,conf.tc[0],conf.tc[1],conf.tc[2],ren,lx,ly,bff,bffs,0);lx+=12*font_size;}
+				ly+=14*font_size;lx=0;
+				printf("%d\n",i);
+			}*/
+			unsigned int tidx=0;unsigned int npv=0;for (unsigned int i=0;i<gmlists;i++){if (npv==mlistio){tidx=i;break;}if (gmlist[i]=='\n'){npv+=1;}}
+			printl(&gmlist[tidx],1,conf.tc[0],conf.tc[1],conf.tc[2],ren,0,0,bff,bffs);
+		}
 		if (idb==1){SDL_RenderCopy(ren,btex,NULL,NULL);lply_debug(ren,win_width,bff,bffs,sfb,13,&debug_struct);printl(gmlist,1,conf.tc[0],conf.tc[1],conf.tc[2],ren,0,28,bff,bffs);lply_drawc(ren,font_size,win_width,win_height,mlisti+1,bff,bffs);}
 		SDL_RenderPresent(ren);
 		SDL_Delay(20);
 	}
 	sclose(&sock);
+
+	if (mbuff!=NULL){free(mbuff);}
 
 	free(gmlist);
 	free(gflist);

@@ -8,6 +8,23 @@ char lply_sbl(char* path)
 	return 0;
 }
 
+char lply_gmdfld(unsigned char **mbuff,unsigned int *sbuff,char *ld,char *fn)
+{
+	char pathff[512];
+	snprintf(pathff,511,"%s%s",ld,fn);
+	
+	FILE *file=fopen(pathff,"r");
+	if (file==NULL){return -1;}
+	
+	fseek(file,0,SEEK_END);unsigned int fs=ftell(file);fseek(file,0,SEEK_SET);
+	if (*mbuff!=NULL){free(*mbuff);*mbuff=NULL;}
+	*mbuff=(char*)malloc(fs);fread(*mbuff,fs,1,file);
+
+	fclose(file);
+	*sbuff=fs;
+	return 0;
+}
+
 void lply_gmlfld(char **str,unsigned int *strs,unsigned int *stri,char **fn,unsigned int *fs,unsigned int *fi,char* path)
 {
 	DIR *dir=opendir(path);
@@ -43,8 +60,8 @@ void lply_gmlfld(char **str,unsigned int *strs,unsigned int *stri,char **fn,unsi
 	}
 	rewinddir(dir);
 
-	*fn=(char*)malloc(fns);if (fn==NULL){printf("fn\n");}
-	*str=(char*)malloc(sns);if (str==NULL){printf("str\n");}
+	*fn=(char*)malloc(fns+1);
+	*str=(char*)malloc(sns+1);
 
 	unsigned int cp=0;
 	unsigned int ncp=0;
@@ -67,12 +84,12 @@ void lply_gmlfld(char **str,unsigned int *strs,unsigned int *stri,char **fn,unsi
 
 		memcpy(&(*fn)[cp],cf->d_name,strlen(cf->d_name));cp+=strlen(cf->d_name);(*fn)[cp]='\n';cp+=1;
 	}
-	(*fn)[cp-1]='\0';
-	(*str)[ncp-1]='\0';
+	(*fn)[fns]='\0';
+	(*str)[sns]='\0';
 
 	if (file!=NULL){fclose(file);}
 	closedir(dir);
-	
+
 	*strs=sns;
 	*fs=fns;
 }
