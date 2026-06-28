@@ -48,15 +48,37 @@ short lply_gmlfls(int *sock,struct sockaddr_in *faddr,char **mlist,unsigned int 
 		if (mlistrm==0){continue;}
 		
 		*mlist=(char*)malloc(mlistrm);
-		if (lply_read(sock,faddr,*mlist,mlistrm,0)<1){sclose(sock);return -2;}
+		size_t crp=0;
+		unsigned char nfdwr=0;
+		while (crp<mlistrm)
+		{
+			char tbuff[1024];
+			size_t csb=lply_read(sock,faddr,tbuff,1024,0);
+			if (csb<1){sclose(sock);return -2;}
+			if (csb==2 && *(unsigned short*)tbuff==0xe3dd){nfdwr=1;break;}
+			memcpy(*mlist+crp,tbuff,csb);
+			crp+=csb;
+		}
+		if (nfdwr==0){unsigned short yaya;if (lply_read(sock,faddr,&yaya,2,0)<1){sclose(sock);return -2;}}
 		*mlists=mlistrm;
 		for (unsigned int i=0;i<*mlists;i++){if ((*mlist)[i]=='\n'){*tmi+=1;}}
 
 		size_t flistrm;
 		if (lply_read(sock,faddr,&flistrm,sizeof(flistrm),0)<1){sclose(sock);return -2;}
-		if (flistrm==0){continue;}
+		if (flistrm==0){sclose(sock);return -2;}
 		*flist=(char*)malloc(flistrm);
-		if (lply_read(sock,faddr,*flist,flistrm,0)<1){sclose(sock);return -2;}
+		crp=0;
+		nfdwr=0;
+		while (crp<flistrm)
+		{
+			char tbuff[1024];
+			size_t csb=lply_read(sock,faddr,tbuff,1024,0);
+			if (csb<1){sclose(sock);return -2;}
+			if (csb==2 && *(unsigned short*)tbuff==0xe3dd){nfdwr=1;break;}
+			memcpy(*flist+crp,tbuff,csb);
+			crp+=csb;
+		}
+		if (nfdwr==0){unsigned short yaya;if (lply_read(sock,faddr,&yaya,2,0)<1){sclose(sock);return -2;}}
 		*flists=flistrm;
 		for (unsigned int i=0;i<*flists;i++){if ((*flist)[i]=='\n'){*tfi+=1;}}
 		break;
