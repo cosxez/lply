@@ -21,6 +21,7 @@
 #include "network.h"
 #include "lmdr.h"
 #include "sound.h"
+#include "thrds.h"
 
 int main()
 {
@@ -108,7 +109,7 @@ int main()
 			if (ev.type==SDL_KEYDOWN &&ev.key.keysym.sym==SDLK_KP_PLUS){if (lobg>=0){break;}unsigned char* px;int pitch=0;if(SDL_LockTexture(btex,NULL,(void**)&px,&pitch)==0){for (unsigned int i=0;i<=tex_width*tex_height*3;i++){px[i]=px[i]*2;}SDL_UnlockTexture(btex);lobg+=1;}}
 			if (ev.type==SDL_KEYDOWN &&ev.key.keysym.sym==SDLK_KP_MINUS){if (lobg<=-5){break;}unsigned char* px;int pitch=0;if (SDL_LockTexture(btex,NULL,(void**)&px,&pitch)==0){for (unsigned int i=0;i<=tex_width*tex_height*3;i++){px[i]=px[i]/2;}SDL_UnlockTexture(btex);lobg-=1;}}
 			if (ev.type==SDL_KEYDOWN && ev.key.keysym.sym==SDLK_SPACE &&ev.key.repeat==0){lply_posct(&sound);break;}
-			if (ev.type==SDL_KEYDOWN &&ev.key.keysym.sym==SDLK_RETURN &&ev.key.repeat==0 && is_busy==0){cur_opp=lply_capt(gmlist,gmlists,tgmi,tlmi,gflist,gflists,tgfi,mlisti,mlistio,&is_busy,conf.lmd,&mbuff,&sbuff,&eng,&decoder,&sound,&mcp,&sock,&faddr);}
+			if (ev.type==SDL_KEYDOWN &&ev.key.keysym.sym==SDLK_RETURN &&ev.key.repeat==0 && is_busy==0){thrd_t thr;TSlply_capt* ts=malloc(sizeof(TSlply_capt));ts->mlist=gmlist;ts->mlistrm=gmlists;ts->tgmi=tgmi;ts->tlmi=tlmi;ts->flist=gflist;ts->flists=gflists;ts->tgfi=tgfi;ts->mlisti=mlisti;ts->mlistio=mlistio;ts->is_busy=&is_busy;ts->ld=conf.lmd;ts->mbuff=&mbuff;ts->sbuff=&sbuff;ts->eng=&eng;ts->decoder=&decoder;ts->sound=&sound;ts->mcp=&mcp;ts->sock=&sock;ts->faddr=&faddr;ts->ra=&cur_opp;thrd_create(&thr,lply_tcapt,ts);thrd_detach(thr);}
 		}
 		if (cur_opp==-1){SDL_SetRenderDrawColor(ren,0,0,0,255);SDL_RenderClear(ren);printl("Error: nstate=0 & lstate=0",2,255,0,0,ren,win_width/2-12*2*13,win_height/2-14*2,bff,bffs);SDL_RenderPresent(ren);}
 		if (cur_opp==-2){SDL_SetRenderDrawColor(ren,0,0,0,255);SDL_RenderClear(ren);printl("Error: file was not open",2,255,0,0,ren,win_width/2-12*2*12,win_height/2-14*2,bff,bffs);}
