@@ -23,11 +23,11 @@ char lply_capt(char *mlist,unsigned int mlistrm,unsigned int tgmi,unsigned int t
 	char *sfb=NULL;unsigned int sfbs=0;
 	for (unsigned int i=0;i<flists;i++)
 	{
-		if (flist[i]=='\n'){sfli+=1;if (smli==sfli){sfb=(char*)malloc(i-spffl);memcpy(sfb,&flist[spffl],i-spffl);sfbs=i-spffl;break;}spffl=i+1;}
+		if (flist[i]=='\n'){sfli+=1;if (smli==sfli){sfb=(char*)malloc(i-spffl+1);memcpy(sfb,&flist[spffl],i-spffl);sfb[i-spffl]='\0';sfbs=i-spffl;break;}spffl=i+1;}
 	}
 
 	if (sfli<=tlmi){if (lply_gmdfld(mbuff,sbuff,ld,sfb)!=0){free(sfb);*is_busy=0;return -2;}if (ma_sound_is_playing(sound)){ma_sound_stop(sound);}ma_sound_uninit(sound);ma_decoder_uninit(decoder);}
-	else {if (lply_gmdsfs(sock,faddr,sfb,sfbs,mbuff,sbuff)!=0){if (*mbuff!=NULL){free(*mbuff);}free(sfb);*is_busy=0;return -3;}if (ma_sound_is_playing(sound)){ma_sound_stop(sound);}ma_sound_uninit(sound);ma_decoder_uninit(decoder);lply_rmdaps(sock,faddr,*mbuff,*sbuff,sfb,sfbs);}
+	else {if (lply_gmdsfs(sock,faddr,sfb,sfbs,mbuff,sbuff)!=0){free(sfb);*is_busy=0;return -3;}if (ma_sound_is_playing(sound)){ma_sound_stop(sound);}ma_sound_uninit(sound);ma_decoder_uninit(decoder);lply_rmdaps(sock,faddr,*mbuff,*sbuff,sfb,sfbs);}
 	
 	free(sfb);
 	*is_busy=0;
