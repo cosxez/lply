@@ -93,11 +93,24 @@ void udp_smlist(int *sock,struct sockaddr_in faddr,struct cnf *conf)
 	}
 	size_t mlists=mlist.size();
 	sendto(*sock,&mlists,sizeof(mlists),0,(struct sockaddr*)&faddr,sizeof(faddr));
-	sendto(*sock,mlist.c_str(),mlists,0,(struct sockaddr*)&faddr,sizeof(faddr));
-	
+	size_t crp=0;
+	while (crp<mlists)
+	{
+		if (crp+1024<mlists){sendto(*sock,&mlist[crp],1024,0,(struct sockaddr*)&faddr,sizeof(faddr));crp+=1024;}
+		else{sendto(*sock,&mlist[crp],mlists-crp,0,(struct sockaddr*)&faddr,sizeof(faddr));crp+=mlists-crp;}
+	}
+	unsigned short mgcfe=0xe3dd;
+	sendto(*sock,&mgcfe,2,0,(struct sockaddr*)&faddr,sizeof(faddr));
+
 	size_t flists=flist.size();
 	sendto(*sock,&flists,sizeof(flists),0,(struct sockaddr*)&faddr,sizeof(faddr));
-	sendto(*sock,flist.c_str(),flists,0,(struct sockaddr*)&faddr,sizeof(faddr));
+	crp=0;
+	while (crp<flists)
+	{
+		if (crp+1024<flists){sendto(*sock,&flist[crp],1024,0,(struct sockaddr*)&faddr,sizeof(faddr));crp+=1024;}
+		else{sendto(*sock,&flist[crp],flists-crp,0,(struct sockaddr*)&faddr,sizeof(faddr));crp+=flists-crp;}
+	}
+	sendto(*sock,&mgcfe,2,0,(struct sockaddr*)&faddr,sizeof(faddr));
 	std::cout<<"\"mlist\" sended\n";
 }
 
