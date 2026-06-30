@@ -43,7 +43,7 @@ char cfg_pars(struct cnf* conf)
 			}
 			if (strcmp(arg,"port")==0)
 			{
-				conf->port=atoi(pr);
+				conf->port=(unsigned short)atoi(pr);
 			}
 			if (strcmp(arg,"theme-file")==0)
 			{
@@ -74,6 +74,23 @@ char cfg_pars(struct cnf* conf)
 			if (strcmp(arg,"text-color-blue")==0)
 			{
 				conf->tc[2]=(unsigned char)atoi(pr);
+			}
+			if (strcmp(arg,"win-width")==0)
+			{
+				conf->win_width=(int)atoi(pr);
+			}
+			if (strcmp(arg,"win-height")==0)
+			{
+				conf->win_height=(int)atoi(pr);
+			}
+			if (strcmp(arg,"reserve-ram")==0)
+			{
+				conf->drsbuff=(unsigned int)atoi(pr);
+			}
+			if (strcmp(arg,"show-progress-bar")==0)
+			{
+				if (strcmp(pr,"y")==0){conf->spblm=1;}
+				if (strcmp(pr,"n")==0){conf->spblm=0;}
 			}
 			free(pr);
 			pr=NULL;

@@ -111,6 +111,7 @@ void printl(char* str,unsigned char font_size,unsigned char cr,unsigned char cg,
 void lply_debug(SDL_Renderer* ren,unsigned int win_width,unsigned char* bff,unsigned int bffs,unsigned char *sfb,unsigned int sfbs,struct dbs *des)
 {
 	for (unsigned int y=0;y<28;y++){SDL_SetRenderDrawColor(ren,0,0,0,255);SDL_RenderDrawLine(ren,0,y,win_width,y);}
+	printc('~',2,des->rstate==0 ? 255 : 0,des->rstate==1 ? 255 : 0,0,ren,win_width-win_width/100*24,0,sfb,sfbs,0xdd5a);
 	printc('~',2,des->nstate==0 ? 255 : 0,des->nstate==1 ? 255 : 0,0,ren,win_width-win_width/100*20,0,sfb,sfbs,0x31f1);
 	printl("ld",1,des->lstate==0 ? 255 : 0,des->lstate==1 ? 255 : 0,0,ren,win_width-win_width/100*16,13,bff,bffs);
 }

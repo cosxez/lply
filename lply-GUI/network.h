@@ -42,7 +42,7 @@ short lply_gmlfls(int *sock,struct sockaddr_in *faddr,char **mlist,unsigned int 
 		sendto(*sock,&mgcfgml,sizeof(mgcfgml),0,(struct sockaddr*)faddr,sizeof(struct sockaddr_in));
 
 		thrd_sleep(&dl,NULL);
-		size_t mlistrm;
+		size_t mlistrm=0;
 		if (i==15){return -322;}
 		if (lply_read(sock,faddr,&mlistrm,sizeof(mlistrm),MSG_DONTWAIT)<1){continue;}
 		if (mlistrm==0){continue;}
@@ -63,7 +63,7 @@ short lply_gmlfls(int *sock,struct sockaddr_in *faddr,char **mlist,unsigned int 
 		*mlists=mlistrm;
 		for (unsigned int i=0;i<*mlists;i++){if ((*mlist)[i]=='\n'){*tmi+=1;}}
 
-		size_t flistrm;
+		size_t flistrm=0;
 		if (lply_read(sock,faddr,&flistrm,sizeof(flistrm),0)<1){sclose(sock);return -2;}
 		if (flistrm==0){sclose(sock);return -2;}
 		*flist=(char*)malloc(flistrm);
@@ -86,7 +86,7 @@ short lply_gmlfls(int *sock,struct sockaddr_in *faddr,char **mlist,unsigned int 
 	return 0;
 }
 
-short lply_gmdsfs(int *sock,struct sockaddr_in *faddr,char* sfb,unsigned int sfbs,unsigned char **mbuff,unsigned int *sbuff)
+short lply_gmdsfs(int *sock,struct sockaddr_in *faddr,char* sfb,unsigned int sfbs,unsigned char **mbuff,unsigned int *sbuff,unsigned int *mds)
 {
 	unsigned char bfgmd[2+sfbs];
 	*(unsigned short*)bfgmd=0x65f1;
@@ -102,14 +102,13 @@ short lply_gmdsfs(int *sock,struct sockaddr_in *faddr,char* sfb,unsigned int sfb
 		if (lply_read(sock,faddr,&tbuff,sizeof(tbuff),MSG_DONTWAIT)==10 && *(unsigned short*)tbuff==0xa5f1){memcpy(&bsfm,&tbuff[2],8);break;}
 		if (i==15){return -322;}
 	}
-	if (*mbuff!=NULL){free(*mbuff);*mbuff=NULL;}
-	*mbuff=(char*)malloc(bsfm);
-	*sbuff=bsfm;
+	if (bsfm>*sbuff){unsigned char *tmp=realloc(*mbuff,bsfm);if (tmp==NULL){return -1;}*mbuff=tmp;*sbuff=bsfm;}
 
+	*mds=bsfm;
 	return 0;
 }
 
-void lply_rmdaps(int *sock,struct sockaddr_in *faddr,void *pbuff,unsigned int sbuff,char* sfb,unsigned int sfbs)
+void lply_rmdaps(int *sock,struct sockaddr_in *faddr,void *pbuff,unsigned int sbuff,char* sfb,unsigned int sfbs,unsigned int* nls)
 {
 	size_t crp=0;
 
@@ -136,6 +135,8 @@ void lply_rmdaps(int *sock,struct sockaddr_in *faddr,void *pbuff,unsigned int sb
 		}
 		if (nfdwr==1){continue;}
 		if (nfdwr==0){unsigned short yaya;if (lply_read(sock,faddr,&yaya,2,0)<1){return;}}
+		
 		crp+=ccrp;
+		*nls=crp;
 	}
 }

@@ -6,7 +6,7 @@ void lply_posct(ma_sound *sound)
 	if (!ma_sound_is_playing(sound)){ma_sound_start(sound);}
 }
 
-char lply_capt(char *mlist,unsigned int mlistrm,unsigned int tgmi,unsigned int tlmi,char *flist,unsigned int flists,unsigned int tgfi,unsigned int mlisti,unsigned int mlistio,char *is_busy,char *ld,unsigned char **mbuff,unsigned int *sbuff,ma_engine *eng,ma_decoder *decoder,ma_sound *sound,unsigned long long int *mcp,int *sock,struct sockaddr_in *faddr)
+char lply_capt(char *mlist,unsigned int mlistrm,unsigned int tgmi,unsigned int tlmi,char *flist,unsigned int flists,unsigned int tgfi,unsigned int mlisti,unsigned int mlistio,char *is_busy,char *ld,unsigned char **mbuff,unsigned int *sbuff,ma_engine *eng,ma_decoder *decoder,ma_sound *sound,unsigned long long int *mcp,int *sock,struct sockaddr_in *faddr,unsigned int* nls)
 {
 	*is_busy=1;
 
@@ -26,13 +26,15 @@ char lply_capt(char *mlist,unsigned int mlistrm,unsigned int tgmi,unsigned int t
 		if (flist[i]=='\n'){sfli+=1;if (smli==sfli){sfb=(char*)malloc(i-spffl+1);memcpy(sfb,&flist[spffl],i-spffl);sfb[i-spffl]='\0';sfbs=i-spffl;break;}spffl=i+1;}
 	}
 
-	if (sfli<=tlmi){if (lply_gmdfld(mbuff,sbuff,ld,sfb)!=0){free(sfb);*is_busy=0;return -2;}if (ma_sound_is_playing(sound)){ma_sound_stop(sound);}ma_sound_uninit(sound);ma_decoder_uninit(decoder);}
-	else {if (lply_gmdsfs(sock,faddr,sfb,sfbs,mbuff,sbuff)!=0){free(sfb);*is_busy=0;return -3;}if (ma_sound_is_playing(sound)){ma_sound_stop(sound);}ma_sound_uninit(sound);ma_decoder_uninit(decoder);lply_rmdaps(sock,faddr,*mbuff,*sbuff,sfb,sfbs);}
+	unsigned int mds=0;
+	*nls=0;
+	if (sfli<=tlmi){if (lply_gmdfld(mbuff,sbuff,ld,sfb,&mds)!=0){free(sfb);*is_busy=0;return -2;}if (ma_sound_is_playing(sound)){ma_sound_stop(sound);}ma_sound_uninit(sound);ma_decoder_uninit(decoder);}
+	else {if (lply_gmdsfs(sock,faddr,sfb,sfbs,mbuff,sbuff,&mds)!=0){free(sfb);*is_busy=0;return -3;}if (ma_sound_is_playing(sound)){ma_sound_stop(sound);}ma_sound_uninit(sound);ma_decoder_uninit(decoder);lply_rmdaps(sock,faddr,*mbuff,*sbuff,sfb,sfbs,nls);}
 	
 	free(sfb);
 	*is_busy=0;
 
-	ma_decoder_init_memory(*mbuff,*sbuff,NULL,decoder);
+	ma_decoder_init_memory(*mbuff,mds,NULL,decoder);
 	ma_sound_init_from_data_source(eng,decoder,0,NULL,sound);
 	ma_data_source_get_length_in_pcm_frames(ma_sound_get_data_source(sound),mcp);
 	ma_sound_start(sound);

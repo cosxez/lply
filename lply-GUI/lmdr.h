@@ -8,7 +8,7 @@ char lply_sbl(char* path)
 	return 0;
 }
 
-char lply_gmdfld(unsigned char **mbuff,unsigned int *sbuff,char *ld,char *fn)
+char lply_gmdfld(unsigned char **mbuff,unsigned int *sbuff,char *ld,char *fn,unsigned int *mds)
 {
 	char pathff[512];
 	snprintf(pathff,511,"%s%s",ld,fn);
@@ -17,11 +17,11 @@ char lply_gmdfld(unsigned char **mbuff,unsigned int *sbuff,char *ld,char *fn)
 	if (file==NULL){return -1;}
 	
 	fseek(file,0,SEEK_END);unsigned int fs=ftell(file);fseek(file,0,SEEK_SET);
-	if (*mbuff!=NULL){free(*mbuff);*mbuff=NULL;}
-	*mbuff=(char*)malloc(fs);fread(*mbuff,fs,1,file);
+	if (fs>*sbuff){unsigned char *tmp=realloc(*mbuff,fs);if (tmp==NULL){fclose(file);return -2;}fread(tmp,fs,1,file);*mbuff=tmp;*sbuff=fs;}
+	else{fread(*mbuff,fs,1,file);}
 
 	fclose(file);
-	*sbuff=fs;
+	*mds=fs;
 	return 0;
 }
 

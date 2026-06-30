@@ -5,9 +5,13 @@ struct cnf
 	char bgi[512];
 	char lmd[512];
 	char ip[128];
+	int win_width;
+	int win_height;
+	unsigned int drsbuff;
 	unsigned short port;
 	char thie;
 	char wm;
+	char spblm;
 	unsigned char tc[3];
 };
 
@@ -21,6 +25,7 @@ struct dbs
 {
 	char nstate;
 	char lstate;
+	char rstate;
 };
 
 typedef struct
@@ -44,6 +49,7 @@ typedef struct
 	unsigned long long int *mcp;
 	int *sock;
 	struct sockaddr_in *faddr;
+	unsigned int *nls;
 
 	char *ra;
 }TSlply_capt;
