@@ -45,7 +45,7 @@ short lply_gmlfls(int *sock,struct sockaddr_in *faddr,char **mlist,unsigned int 
 		size_t mlistrm=0;
 		if (i==15){return -322;}
 		if (lply_read(sock,faddr,&mlistrm,sizeof(mlistrm),MSG_DONTWAIT)<1){continue;}
-		if (mlistrm==0){continue;}
+		if (mlistrm==0){return -55;}
 		
 		*mlist=(char*)malloc(mlistrm);
 		size_t crp=0;

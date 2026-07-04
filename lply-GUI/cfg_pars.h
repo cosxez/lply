@@ -6,10 +6,10 @@ char cfg_pars(struct cnf* conf)
 	if (file!=NULL)
 	{
 		char *cl=NULL;
-		char *arg=NULL;
-		char *pr=NULL;
 		size_t cls=0;
 		size_t prs=0;
+
+		char arg[128];char pr[1024];
 		
 		int rss=0;
 		while (rss!=-1)
@@ -18,18 +18,16 @@ char cfg_pars(struct cnf* conf)
 			if (rss==-1){break;}
 			for (int i=0;i<rss;i++)
 			{
-				if (cl[i]==' ' || cl[i]=='=')
+				if (i<128 &&(cl[i]==' ' || cl[i]=='='))
 				{
-					arg=(char*)malloc(i);
 					memcpy(arg,cl,i);arg[i]='\0';
 					break;
 				}
 			}
 			for (int i=rss-1;i>0;i--)
 			{
-				if (cl[i]==' ' || cl[i]=='=')
+				if (i<1024&&(cl[i]==' ' || cl[i]=='='))
 				{
-					pr=(char*)malloc(rss-i-2);
 					memcpy(pr,cl+i+1,rss-i-2);
 					prs=rss-i-2;pr[prs]='\0';
 					break;
@@ -92,12 +90,7 @@ char cfg_pars(struct cnf* conf)
 				if (strcmp(pr,"y")==0){conf->spblm=1;}
 				if (strcmp(pr,"n")==0){conf->spblm=0;}
 			}
-			free(pr);
-			pr=NULL;
-			free(arg);
-			arg=NULL;
 		}
-		if (pr!=NULL){free(pr);}if (arg!=NULL){free(arg);}
 		free(cl);
 		fclose(file);
 		return 0;
