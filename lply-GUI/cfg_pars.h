@@ -73,6 +73,22 @@ char cfg_pars(struct cnf* conf)
 			{
 				conf->tc[2]=(unsigned char)atoi(pr);
 			}
+			if (strcmp(arg,"cursor-color-red")==0)
+			{
+				conf->cc[0]=(unsigned char)atoi(pr);
+			}
+			if (strcmp(arg,"cursor-color-green")==0)
+			{
+				conf->cc[1]=(unsigned char)atoi(pr);
+			}
+			if (strcmp(arg,"cursor-color-blue")==0)
+			{
+				conf->cc[2]=(unsigned char)atoi(pr);
+			}
+			if (strcmp(arg,"black-line-under-cursor")==0)
+			{
+				if (strcmp(pr,"y")==0){conf->bluc=1;}
+			}
 			if (strcmp(arg,"win-width")==0)
 			{
 				conf->win_width=(int)atoi(pr);

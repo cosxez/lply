@@ -13,6 +13,8 @@ struct cnf
 	char wm;
 	char spblm;
 	unsigned char tc[3];
+	unsigned char cc[3];
+	char bluc;
 };
 
 struct fcamn

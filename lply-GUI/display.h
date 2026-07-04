@@ -116,10 +116,13 @@ void lply_debug(SDL_Renderer* ren,unsigned int win_width,unsigned char* bff,unsi
 	printl("ld",2,1,des->lstate==0 ? 255 : 0,des->lstate==1 ? 255 : 0,0,ren,win_width-win_width/100*16,13,bff,bffs);
 }
 
-void lply_drawc(SDL_Renderer *ren,unsigned char font_size,int win_width,int win_height,unsigned int mlisti,unsigned char* bff,unsigned int bffs)
+void lply_drawc(char bluc,unsigned char cc[3],SDL_Renderer *ren,unsigned char font_size,int win_width,int win_height,unsigned int mlisti,unsigned char* bff,unsigned int bffs)
 {
-	SDL_SetRenderDrawColor(ren,0,0,0,255);
-	SDL_RenderFillRect(ren,&(SDL_Rect){win_width-24*font_size,0,win_width,win_height});
-	printc('<',1,255,255,255,ren,win_width-24*font_size,mlisti*(14*font_size),bff,bffs,0);
-	printc('-',1,255,255,255,ren,win_width-12*font_size,mlisti*(14*font_size),bff,bffs,0);
+	if (bluc==1)
+	{
+		SDL_SetRenderDrawColor(ren,0,0,0,255);
+		SDL_RenderFillRect(ren,&(SDL_Rect){win_width-24*font_size,0,win_width,win_height});
+	}
+	printc('<',1,cc[0],cc[1],cc[2],ren,win_width-24*font_size,mlisti*(14*font_size),bff,bffs,0);
+	printc('-',1,cc[0],cc[1],cc[2],ren,win_width-12*font_size,mlisti*(14*font_size),bff,bffs,0);
 }

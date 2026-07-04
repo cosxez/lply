@@ -26,7 +26,7 @@
 
 int main()
 {
-	struct cnf conf;conf.thie=0;conf.wm=0;memset(&(conf.tc),0,3);conf.win_width=864;conf.win_height=576;conf.drsbuff=10;conf.spblm=0;
+	struct cnf conf;conf.thie=0;conf.wm=0;memset(&(conf.tc),0,6);conf.win_width=864;conf.win_height=576;conf.drsbuff=32;conf.spblm=0;conf.bluc=0;
 	if (cfg_pars(&conf)!=0){return -1;}
 	
 	int sock=-1;struct sockaddr_in addr;struct sockaddr_in faddr;memset(&addr,0,sizeof(addr));memset(&faddr,0,sizeof(faddr));
@@ -57,7 +57,7 @@ int main()
 	unsigned int bffs;
 	if (lply_sthm(conf.bgi,conf.thie,&bfbg,&bff,&bffs)!=0){return -2;}
 	SDL_Texture *btex=NULL;btex=SDL_CreateTexture(ren,SDL_PIXELFORMAT_RGB24,SDL_TEXTUREACCESS_STREAMING,*(unsigned int*)bfbg,*(unsigned int*)(bfbg+4));unsigned int tex_width=*(unsigned int*)bfbg;unsigned int tex_height=*(unsigned int*)(bfbg+4);
-	lply_sa(ren,btex,bfbg);
+	lply_sa(ren,btex,bfbg);printl("loading...",10,1,144,121,255,ren,conf.win_width/2-12*5,conf.win_height/2,bff,bffs);SDL_RenderPresent(ren);
 	
 	unsigned char sfb[]={0xf1,0x31,0x05,0x7b,0x8b,0x58,0x87,0x87,0xa8,0x85,0x46,0x85,0xb6,0x5a,0xdd,0x0c,0x26,0xd6,0x26,0x2c,0x2c,0xdc,0xdc,0xd6,0x48,0x4a,0x48,0x68,0x68,0x6a,0x6a,0x4a,0x8a,0xaa,0x8a,0x88,0x88,0xa8,0xa8,0xaa};
 	unsigned char font_size=1;
@@ -87,7 +87,7 @@ int main()
 
 	unsigned int ncrp=0;
 
-	SRAMm* rmbuff=(SRAMm*)malloc(512*sizeof(SRAMm));memset(rmbuff,0,512*sizeof(SRAMm));unsigned short cua=0;
+	SRAMm* rmbuff=(SRAMm*)malloc(conf.drsbuff*sizeof(SRAMm));unsigned short cua=0;
 	unsigned short rmi=1;unsigned short rmio=0;
 
 	float cv=0.5;
@@ -133,7 +133,7 @@ int main()
 		{
 			SDL_RenderCopy(ren,btex,NULL,NULL);
 
-			lply_drawc(ren,font_size,conf.win_width,conf.win_height,mlisti,bff,bffs);
+			lply_drawc(conf.bluc,conf.cc,ren,font_size,conf.win_width,conf.win_height,mlisti,bff,bffs);
 
 			unsigned int tidx=0;unsigned int tidxfct=0;unsigned int npv=0;for (unsigned int i=0;i<gmlists;i++){if (npv==mlistio){tidx=i;break;}if (gmlist[i]=='\n'){npv+=1;}}npv=0;for (unsigned int i=0;i<gmlists;i++){if (npv==mlisti+mlistio-1){tidxfct=i;break;}if (gmlist[i]=='\n'){npv+=1;}}
 			unsigned int lx=0;
@@ -145,9 +145,10 @@ int main()
 		{
 			SDL_RenderCopy(ren,btex,NULL,NULL);
 
-			lply_drawc(ren,font_size,conf.win_width,conf.win_height,rmi,bff,bffs);
+			lply_drawc(conf.bluc,conf.cc,ren,font_size,conf.win_width,conf.win_height,rmi,bff,bffs);
 			
 			for (unsigned short i=rmio;i<cua;i++){printl(rmbuff[i].mn,rmbuff[i].mns,font_size,conf.tc[0],conf.tc[1],conf.tc[2],ren,0,(i-rmio+1)*14*font_size,bff,bffs);}
+			printl(rmbuff[rmi+rmio-1].mn,rmbuff[rmi+rmio-1].mns,font_size,conf.tc[0],conf.tc[1],conf.tc[2],ren,0,0,bff,bffs);
 		}
 		SDL_RenderPresent(ren);
 		SDL_Delay(20);

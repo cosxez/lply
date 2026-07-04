@@ -35,11 +35,11 @@ char lply_capt(SRAMm *rmb,unsigned short rmbs,char *mlist,unsigned int mlistrm,u
 	
 		free(sfb);
 //	}
-	*is_busy=0;
 
 	ma_decoder_init_memory(*mbuff,*mds,NULL,decoder);
 	ma_sound_init_from_data_source(eng,decoder,0,NULL,sound);
 	ma_data_source_get_length_in_pcm_frames(ma_sound_get_data_source(sound),mcp);
+	*is_busy=0;
 	ma_sound_start(sound);
 }
 
@@ -50,10 +50,10 @@ char lply_ptfr(SRAMm *rmb,unsigned short rmbs,unsigned int tidx,unsigned char **
 	ma_sound_uninit(sound);ma_decoder_uninit(decoder);
 
 	*mds=rmb[tidx].mbs;if (*mds>*sbuff){unsigned char* tmp=(unsigned char*)realloc(*mbuff,*mds);if (tmp==NULL){return -4;}memcpy(*mbuff,rmb[tidx].mba,rmb[tidx].mbs);}else{memcpy(*mbuff,rmb[tidx].mba,rmb[tidx].mbs);}
-	*is_busy=0;
 
 	ma_decoder_init_memory(*mbuff,*mds,NULL,decoder);
 	ma_sound_init_from_data_source(eng,decoder,0,NULL,sound);
 	ma_data_source_get_length_in_pcm_frames(ma_sound_get_data_source(sound),mcp);
+	*is_busy=0;
 	ma_sound_start(sound);
 }
