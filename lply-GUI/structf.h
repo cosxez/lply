@@ -30,6 +30,19 @@ struct dbs
 
 typedef struct
 {
+	unsigned char *mba;
+	unsigned int mbs;
+	
+	char *mn;
+	unsigned int mns;
+
+	unsigned int idx;
+}SRAMm;
+
+typedef struct
+{
+	SRAMm *rmb;
+	unsigned short rmbs;
 	char *mlist;
 	unsigned int mlistrm;
 	unsigned int tgmi;
@@ -43,6 +56,7 @@ typedef struct
 	char *ld;
 	unsigned char **mbuff;
 	unsigned int *sbuff;
+	unsigned int *rmds;
 	ma_engine *eng;
 	ma_decoder *decoder;
 	ma_sound *sound;

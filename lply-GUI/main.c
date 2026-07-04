@@ -82,12 +82,13 @@ int main()
 	unsigned long long int mcp=0;
 
 	unsigned char* mbuff=NULL;
-	unsigned int sbuff=1024*1024*3;
+	unsigned int sbuff=1024*1024*3;unsigned int rmds=0;
 	mbuff=(unsigned char*)malloc(sbuff);
 
 	unsigned int ncrp=0;
 
-	void* rmbuff[512];
+	SRAMm* rmbuff=(SRAMm*)malloc(512*sizeof(SRAMm));memset(rmbuff,0,512*sizeof(SRAMm));unsigned short cua=0;
+	unsigned short rmi=1;unsigned short rmio=0;
 
 	float cv=0.5;
 	ma_engine_set_volume(&eng,cv);
@@ -104,10 +105,15 @@ int main()
 
 			if (ev.type==SDL_KEYDOWN && (ev.key.keysym.mod & KMOD_ALT)!=0 && ev.key.keysym.sym==SDLK_UP){if ((cv+0.05)<=1){cv+=0.05;ma_engine_set_volume(&eng,cv);break;}}
 			if (ev.type==SDL_KEYDOWN && (ev.key.keysym.mod & KMOD_ALT)!=0 && ev.key.keysym.sym==SDLK_DOWN){if ((cv-0.05)>=0){cv-=0.05;ma_engine_set_volume(&eng,cv);break;}}
-
-			if (ev.type==SDL_KEYDOWN && (ev.key.keysym.mod & KMOD_ALT)==0 && ev.key.keysym.sym==SDLK_UP){if (mlistio>0 && ((mlisti+2)*(14*font_size)==(3*(14*font_size)))){mlistio-=1;break;}if ((mlisti+mlistio)>1){mlisti-=1;break;}}
-			if (ev.type==SDL_KEYDOWN && (ev.key.keysym.mod & KMOD_ALT)==0 && ev.key.keysym.sym==SDLK_DOWN){if ((mlisti+mlistio)<tgmi && ((mlisti+2)*(14*font_size)<conf.win_height)){mlisti+=1;break;}if ((mlisti+mlistio)<tgmi && ((mlisti+2)*(14*font_size)>=conf.win_height)){mlistio+=1;break;}}
 			
+			if (cur_opp==2 &&ev.type==SDL_KEYDOWN && (ev.key.keysym.mod & KMOD_ALT)==0 && ev.key.keysym.sym==SDLK_UP){if (rmio>0 && ((rmi+2)*(14*font_size)==(3*(14*font_size)))){rmio-=1;break;}if ((rmi+rmio)>1){rmi-=1;break;}}
+			if (cur_opp==2 &&ev.type==SDL_KEYDOWN && (ev.key.keysym.mod & KMOD_ALT)==0 && ev.key.keysym.sym==SDLK_DOWN){if ((rmi+rmio)<cua && ((rmi+2)*(14*font_size)<conf.win_height)){rmi+=1;break;}if ((rmi+rmio)<tgmi && ((rmi+2)*(14*font_size)>=conf.win_height)){rmio+=1;break;}}
+
+			if (cur_opp==0 &&ev.type==SDL_KEYDOWN && (ev.key.keysym.mod & KMOD_ALT)==0 && ev.key.keysym.sym==SDLK_UP){if (mlistio>0 && ((mlisti+2)*(14*font_size)==(3*(14*font_size)))){mlistio-=1;break;}if ((mlisti+mlistio)>1){mlisti-=1;break;}}
+			if (cur_opp==0 &&ev.type==SDL_KEYDOWN && (ev.key.keysym.mod & KMOD_ALT)==0 && ev.key.keysym.sym==SDLK_DOWN){if ((mlisti+mlistio)<tgmi && ((mlisti+2)*(14*font_size)<conf.win_height)){mlisti+=1;break;}if ((mlisti+mlistio)<tgmi && ((mlisti+2)*(14*font_size)>=conf.win_height)){mlistio+=1;break;}}
+			
+			if (cur_opp==0 &&is_busy==0 &&ev.type==SDL_KEYDOWN &&ev.key.keysym.sym==SDLK_p){char ign=0;for (unsigned short i=0;i<cua;i++){if (rmbuff[i].idx==mlisti+mlistio){ign=1;break;}}if (ign==0&&cua<512){is_busy=1;SRAMm ts;ts.mba=(unsigned char*)malloc(rmds);memcpy(ts.mba,mbuff,rmds);ts.mbs=rmds;unsigned int npv=0;unsigned int tidx=0;for (unsigned int i=0;i<gmlists;i++){if (npv==mlisti+mlistio-1){tidx=i;break;}if (gmlist[i]=='\n'){npv+=1;}}for (unsigned int i=tidx;i<gmlists;i++){if (npv==mlisti+mlistio){ts.mn=(char*)malloc(i-tidx);memcpy(ts.mn,&gmlist[tidx],i-tidx);ts.mns=i-tidx;break;}if (gmlist[i]=='\n'){npv+=1;}}ts.idx=mlisti+mlistio;rmbuff[cua]=ts;cua+=1;is_busy=0;}break;}
+
 			if (ev.type==SDL_KEYDOWN &&ev.key.keysym.sym==SDLK_d){if (cur_opp==0){cur_opp=1;break;}cur_opp=0;}
 
 			if (ev.type==SDL_KEYDOWN &&ev.key.keysym.sym==SDLK_r){if (cur_opp==0){cur_opp=2;break;}cur_opp=0;}
@@ -115,7 +121,7 @@ int main()
 			if (ev.type==SDL_KEYDOWN &&ev.key.keysym.sym==SDLK_KP_PLUS){if (lobg>=0){break;}unsigned char* px;int pitch=0;if(SDL_LockTexture(btex,NULL,(void**)&px,&pitch)==0){for (unsigned int i=0;i<=tex_width*tex_height*3;i++){px[i]=px[i]*2;}SDL_UnlockTexture(btex);lobg+=1;}}
 			if (ev.type==SDL_KEYDOWN &&ev.key.keysym.sym==SDLK_KP_MINUS){if (lobg<=-5){break;}unsigned char* px;int pitch=0;if (SDL_LockTexture(btex,NULL,(void**)&px,&pitch)==0){for (unsigned int i=0;i<=tex_width*tex_height*3;i++){px[i]=px[i]/2;}SDL_UnlockTexture(btex);lobg-=1;}}
 			if (ev.type==SDL_KEYDOWN && ev.key.keysym.sym==SDLK_SPACE &&ev.key.repeat==0){lply_posct(&sound);break;}
-			if (ev.type==SDL_KEYDOWN &&ev.key.keysym.sym==SDLK_RETURN &&ev.key.repeat==0 && is_busy==0){thrd_t thr;TSlply_capt* ts=malloc(sizeof(TSlply_capt));ts->mlist=gmlist;ts->mlistrm=gmlists;ts->tgmi=tgmi;ts->tlmi=tlmi;ts->flist=gflist;ts->flists=gflists;ts->tgfi=tgfi;ts->mlisti=mlisti;ts->mlistio=mlistio;ts->is_busy=&is_busy;ts->ld=conf.lmd;ts->mbuff=&mbuff;ts->sbuff=&sbuff;ts->eng=&eng;ts->decoder=&decoder;ts->sound=&sound;ts->mcp=&mcp;ts->sock=&sock;ts->faddr=&faddr;ts->ra=&cur_opp;ts->nls=&ncrp;thrd_create(&thr,lply_tcapt,ts);thrd_detach(thr);}
+			if (cur_opp==0 &&is_busy==0 &&ev.type==SDL_KEYDOWN &&ev.key.keysym.sym==SDLK_RETURN &&ev.key.repeat==0){thrd_t thr;TSlply_capt* ts=malloc(sizeof(TSlply_capt));ts->rmb=rmbuff;ts->rmbs=cua;ts->mlist=gmlist;ts->mlistrm=gmlists;ts->tgmi=tgmi;ts->tlmi=tlmi;ts->flist=gflist;ts->flists=gflists;ts->tgfi=tgfi;ts->mlisti=mlisti;ts->mlistio=mlistio;ts->is_busy=&is_busy;ts->ld=conf.lmd;ts->mbuff=&mbuff;ts->sbuff=&sbuff;ts->rmds=&rmds;ts->eng=&eng;ts->decoder=&decoder;ts->sound=&sound;ts->mcp=&mcp;ts->sock=&sock;ts->faddr=&faddr;ts->ra=&cur_opp;ts->nls=&ncrp;thrd_create(&thr,lply_tcapt,ts);thrd_detach(thr);}
 		}
 		if (cur_opp==1){SDL_SetRenderDrawColor(ren,0,0,0,255);SDL_RenderClear(ren);lply_debug(ren,conf.win_width,bff,bffs,sfb,sizeof(sfb),&debug_struct);}
 		if (cur_opp==-1){SDL_SetRenderDrawColor(ren,0,0,0,255);SDL_RenderClear(ren);printl("Error: nstate=0 & lstate=0",26,2,255,0,0,ren,conf.win_width/2-12*2*13,conf.win_height/2-14*2,bff,bffs);}
@@ -136,6 +142,11 @@ int main()
 		}
 		if (cur_opp==2)
 		{
+			SDL_RenderCopy(ren,btex,NULL,NULL);
+
+			lply_drawc(ren,font_size,conf.win_width,conf.win_height,rmi,bff,bffs);
+			
+			for (unsigned short i=rmio;i<cua;i++){printl(rmbuff[i].mn,rmbuff[i].mns,font_size,conf.tc[0],conf.tc[1],conf.tc[2],ren,0,(i-rmio+1)*14*font_size,bff,bffs);}
 		}
 		SDL_RenderPresent(ren);
 		SDL_Delay(20);
@@ -143,6 +154,10 @@ int main()
 	sclose(&sock);
 
 	if (ma_sound_is_playing(&sound)){ma_sound_stop(&sound);}
+	
+	for (unsigned short i=0;i<cua;i++){if (rmbuff[i].mba!=NULL){free(rmbuff[i].mba);rmbuff[i].mba=NULL;}if (rmbuff[i].mn!=NULL){free(rmbuff[i].mn);rmbuff[i].mn=NULL;}}
+
+	if (rmbuff!=NULL){free(rmbuff);}
 	
 	if (mbuff!=NULL){free(mbuff);}
 
