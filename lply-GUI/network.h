@@ -127,7 +127,7 @@ void lply_rmdaps(int *sock,struct sockaddr_in *faddr,void *pbuff,unsigned int sb
 		while (ccrp<*(unsigned short*)(bfgmd+6+sfbs))
 		{
 			unsigned char tb[*(unsigned short*)(bfgmd+6+sfbs)];
-			size_t csb=lply_read(sock,faddr,&tb,sizeof(tb),0);
+			ssize_t csb=lply_read(sock,faddr,&tb,sizeof(tb),0);
 			if (csb<1){return;}
 			if (csb==2 && *(unsigned short*)tb==0xe3dd){nfdwr=1;break;}
 			if (*(unsigned int*)tb + *(unsigned short*)(tb+4)<=sbuff){memcpy(((char*)(pbuff) + *(unsigned int*)tb),&tb[6],*(unsigned short*)(tb+4));}

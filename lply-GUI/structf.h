@@ -56,7 +56,7 @@ typedef struct
 	char *ld;
 	unsigned char **mbuff;
 	unsigned int *sbuff;
-	unsigned int *rmds;
+	unsigned int *mds;
 	ma_engine *eng;
 	ma_decoder *decoder;
 	ma_sound *sound;
@@ -67,3 +67,18 @@ typedef struct
 
 	char *ra;
 }TSlply_capt;
+
+typedef struct
+{
+	SRAMm *rmb;
+	unsigned short rmbs;
+	unsigned int tidx;
+	unsigned char **mbuff;
+	unsigned int *sbuff;
+	unsigned int *mds;
+	unsigned long long int *mcp;
+	ma_engine* eng;
+	ma_sound* sound;
+	ma_decoder* decoder;
+	char *is_busy;
+}TSlply_ptfr;

@@ -17,10 +17,10 @@ char lply_capt(SRAMm *rmb,unsigned short rmbs,char *mlist,unsigned int mlistrm,u
 		if (mlist[i]=='\n'){smli+=1;if (smli==(mlisti+mlistio)){break;}spfml=i+1;}
 	}
 	char mir=0;
-	for (unsigned short i=0;i<rmbs;i++){if (rmb[i].idx==smli){if (ma_sound_is_playing(sound)){ma_sound_stop(sound);}ma_sound_uninit(sound);ma_decoder_uninit(decoder);*mds=rmb[i].mbs;if (*mds>*sbuff){unsigned char* tmp=realloc(*mbuff,*mds);if (tmp==NULL){return -4;}memcpy(*mbuff,rmb[i].mba,rmb[i].mbs);}else{memcpy(*mbuff,rmb[i].mba,rmb[i].mbs);}mir=1;break;}}
+//	for (unsigned short i=0;i<rmbs;i++){if (rmb[i].idx==smli){if (ma_sound_is_playing(sound)){ma_sound_stop(sound);}ma_sound_uninit(sound);ma_decoder_uninit(decoder);*mds=rmb[i].mbs;if (*mds>*sbuff){unsigned char* tmp=(unsigned char*)realloc(*mbuff,*mds);if (tmp==NULL){return -4;}memcpy(*mbuff,rmb[i].mba,rmb[i].mbs);}else{memcpy(*mbuff,rmb[i].mba,rmb[i].mbs);}mir=1;break;}}
 	
-	if (mir==0)
-	{
+//	if (mir==0)
+//	{
 		unsigned int sfli=0;
 		unsigned int spffl=0;
 		char *sfb=NULL;unsigned int sfbs=0;
@@ -34,7 +34,22 @@ char lply_capt(SRAMm *rmb,unsigned short rmbs,char *mlist,unsigned int mlistrm,u
 		else {if (lply_gmdsfs(sock,faddr,sfb,sfbs,mbuff,sbuff,mds)!=0){free(sfb);*is_busy=0;return -3;}if (ma_sound_is_playing(sound)){ma_sound_stop(sound);}ma_sound_uninit(sound);ma_decoder_uninit(decoder);lply_rmdaps(sock,faddr,*mbuff,*sbuff,sfb,sfbs,nls);}
 	
 		free(sfb);
-	}
+//	}
+	*is_busy=0;
+
+	ma_decoder_init_memory(*mbuff,*mds,NULL,decoder);
+	ma_sound_init_from_data_source(eng,decoder,0,NULL,sound);
+	ma_data_source_get_length_in_pcm_frames(ma_sound_get_data_source(sound),mcp);
+	ma_sound_start(sound);
+}
+
+char lply_ptfr(SRAMm *rmb,unsigned short rmbs,unsigned int tidx,unsigned char **mbuff,unsigned int *sbuff,unsigned int *mds,unsigned long long int *mcp,ma_engine *eng,ma_sound *sound,ma_decoder *decoder,char *is_busy)
+{
+	*is_busy=1;
+	if (ma_sound_is_playing(sound)){ma_sound_stop(sound);}
+	ma_sound_uninit(sound);ma_decoder_uninit(decoder);
+
+	*mds=rmb[tidx].mbs;if (*mds>*sbuff){unsigned char* tmp=(unsigned char*)realloc(*mbuff,*mds);if (tmp==NULL){return -4;}memcpy(*mbuff,rmb[tidx].mba,rmb[tidx].mbs);}else{memcpy(*mbuff,rmb[tidx].mba,rmb[tidx].mbs);}
 	*is_busy=0;
 
 	ma_decoder_init_memory(*mbuff,*mds,NULL,decoder);
