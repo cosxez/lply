@@ -181,8 +181,8 @@ void udp_smdp(int *sock,struct sockaddr_in faddr,struct cnf *conf,std::string mf
 		{
 			unsigned char rbfs[1030];
 			*(unsigned int*)rbfs=crp+sp;
-			if ((crp+1024)<sfr){*(unsigned short*)(rbfs+4)=1024;memcpy(&rbfs[6],&bfs[crp],1024);sendto(*sock,rbfs,1030,0,(struct sockaddr*)&faddr,sizeof(faddr));crp+=1024;}
-			else{*(unsigned short*)(rbfs+4)=sfr-crp;memcpy(&rbfs[6],&bfs[crp],sfr-crp);sendto(*sock,rbfs,6+sfr-crp,0,(struct sockaddr*)&faddr,sizeof(faddr));crp+=sfr-crp;}
+			if ((crp+1024)<sfr){memcpy(&rbfs[4],&bfs[crp],1024);sendto(*sock,rbfs,1028,0,(struct sockaddr*)&faddr,sizeof(faddr));crp+=1024;}
+			else{memcpy(&rbfs[4],&bfs[crp],sfr-crp);sendto(*sock,rbfs,4+sfr-crp,0,(struct sockaddr*)&faddr,sizeof(faddr));crp+=sfr-crp;}
 		}
 		free(bfs);
 		unsigned short mgfer=0xe3dd;sendto(*sock,&mgfer,2,0,(struct sockaddr*)&faddr,sizeof(faddr));
