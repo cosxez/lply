@@ -82,12 +82,17 @@ void udp_smlist(int *sock,struct sockaddr_in faddr,struct cnf *conf)
 			std::ifstream file(std::string(conf->dmp)+'/'+(c.path().filename().string()),std::ios::binary);
 			if (file.is_open())
 			{
-				unsigned short sns;file.read(reinterpret_cast<char*>(&sns),2);
-				char tcfm[sns];
-				file.read(reinterpret_cast<char*>(&tcfm),sns);
-				file.close();
+				unsigned int imgc;file.read(reinterpret_cast<char*>(&imgc),4);
+				if (imgc==0xe0f1a4b3)
+				{
+					unsigned short sns;file.read(reinterpret_cast<char*>(&sns),2);
+					char tcfm[sns];
+					file.read(reinterpret_cast<char*>(&tcfm),sns);
+					file.close();
+					mlist+=std::string(tcfm,sns)+'\n';
+				}
+				else{mlist+=(c.path().filename().string())+'\n';}
 				flist+=(c.path().filename().string())+'\n';
-				mlist+=std::string(tcfm,sns)+'\n';
 			}
 		}
 	}
