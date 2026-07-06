@@ -15,6 +15,7 @@ struct cnf
 	unsigned char tc[3];
 	unsigned char cc[3];
 	char bluc;
+	char mfd;
 };
 
 struct fcamn
@@ -66,6 +67,7 @@ typedef struct
 	int *sock;
 	struct sockaddr_in *faddr;
 	unsigned int *nls;
+	char mfd;
 
 	char *ra;
 }TSlply_capt;
@@ -84,3 +86,14 @@ typedef struct
 	ma_decoder* decoder;
 	char *is_busy;
 }TSlply_ptfr;
+
+typedef struct
+{
+	struct sockaddr_in *faddr;
+	void *pbuff;
+	unsigned int sbuff;
+	char *sfb;
+	unsigned int sfbs;
+	unsigned int sp;
+	unsigned short sfg;
+}TSlply_rmdop;

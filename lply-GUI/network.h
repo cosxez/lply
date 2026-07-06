@@ -107,32 +107,46 @@ short lply_gmdsfs(int *sock,struct sockaddr_in *faddr,char* sfb,unsigned int sfb
 	*mds=bsfm;
 	return 0;
 }
-/*
-void lply_rmdop(int *sock,struct sockaddr_in *faddr,void *pbuff,unsigned int sbuff,unsigned short tbs,unsigned char)
+
+int lply_rmdop(void *sa)
 {
-	size_t crp=0;unsigned char nfdwr=2;
+	TSlply_rmdop* ts=(TSlply_rmdop*)sa;
+	int sock=socket(AF_INET,SOCK_DGRAM,0);struct sockaddr_in *faddr=ts->faddr;void* pbuff=ts->pbuff;unsigned int sbuff=ts->sbuff;char *sfb=ts->sfb;unsigned int sfbs=ts->sfbs;unsigned int sp=ts->sp;unsigned short sfg=ts->sfg;free(ts);
+	unsigned short crp=0;unsigned char nfdwr=2;
+	unsigned char bfgmd[8+sfbs];*(unsigned short*)bfgmd=0x6e9d;memcpy(&bfgmd[2],sfb,sfbs);*(unsigned int*)(bfgmd+2+sfbs)=sp;*(unsigned short*)(bfgmd+6+sfbs)=sfg;
+	struct timeval dl;dl.tv_sec=2;dl.tv_usec=0;setsockopt(sock,SOL_SOCKET,SO_RCVTIMEO,&dl,sizeof(dl));
 	while (nfdwr!=0)
 	{
-		sendto(*sock,&bfgmd,sizeof(bfgmd),0,(struct sockaddr*)faddr,sizeof(struct sockaddr_in));
-		while (crp<tbs)
+		sendto(sock,&bfgmd,sizeof(bfgmd),0,(struct sockaddr*)faddr,sizeof(struct sockaddr_in));
+		crp=0;
+		while (crp<sfg)
 		{
-			unsigned char tb[1030];ssize_t csb=0;while (csb!=-2){csb=lply_read(sock,faddr,&tb,sizeof(tb),MSG_DONTWAIT);if (csb>1){break;}}
-			if (csb==2 && *(unsigned short*)(tb+4))
+			unsigned char tb[1030];
+			ssize_t csb=0;
+			csb=lply_read(&sock,faddr,&tb,sizeof(tb),0);
+			if (csb<1){break;}
+			if (csb==2 && *(unsigned short*)tb==0xe3dd){nfdwr=1;break;}
+			if (csb==2){continue;}
+			
+			if (*(unsigned int*)tb + *(unsigned short*)(tb+4)<=sbuff){memcpy((unsigned char*)pbuff + *(unsigned int*)tb,&tb[6],*(unsigned short*)(tb+4));}
+			crp+=*(unsigned short*)(tb+4);
 		}
+		if (crp==sfg){nfdwr=0;}
 	}
-
+	sclose(&sock);
+	return crp;
 }
 
 void lply_trmd(int *sock,struct sockaddr_in *faddr,void *pbuff,unsigned int sbuff,char *sfb,unsigned int sfbs,unsigned int *nls)
 {
 	unsigned int tv=0;size_t crp=0;size_t mcrp=0;
 
-	unsigned char bfgmd[8+sfbs];*(unsigned short*)bfgmd=0x6e9d;memcpy(&bfgmd[2],sfb,sfbs);
 	while (crp<sbuff){if (crp+65535<=sbuff){crp+=65535;}else{crp+=sbuff-crp;}tv+=1;}
 	thrd_t thrs[tv];crp=0;
-	for (unsigned int i=0;i<tv;i++){}
+	for (unsigned int i=0;i<tv;i++){TSlply_rmdop *ts=malloc(sizeof(TSlply_rmdop));ts->faddr=faddr;ts->pbuff=pbuff;ts->sbuff=sbuff;ts->sfb=sfb;ts->sfbs=sfbs;ts->sp=i*65535;if (ts->sp+65535<=sbuff){ts->sfg=65535;}else{ts->sfg=sbuff-ts->sp;}thrd_create(&thrs[i],lply_rmdop,ts);}
+	for (unsigned int i=0;i<tv;i++){int rbr;thrd_join(thrs[i],&rbr);crp+=rbr;*nls=crp;}
 }
-*/
+
 void lply_rmdaps(int *sock,struct sockaddr_in *faddr,void *pbuff,unsigned int sbuff,char* sfb,unsigned int sfbs,unsigned int* nls)
 {
 	size_t crp=0;
@@ -151,12 +165,12 @@ void lply_rmdaps(int *sock,struct sockaddr_in *faddr,void *pbuff,unsigned int sb
 		unsigned char nfdwr=0;
 		while (ccrp<*(unsigned short*)(bfgmd+6+sfbs))
 		{
-			unsigned char tb[*(unsigned short*)(bfgmd+6+sfbs)];
-			int csb=lply_read(sock,faddr,&tb,sizeof(tb),0);
+			unsigned char tb[1030];
+			ssize_t csb=lply_read(sock,faddr,&tb,sizeof(tb),0);
 			if (csb<1){return;}
 			if (csb==2 && *(unsigned short*)tb==0xe3dd){nfdwr=1;break;}
-			if (*(unsigned int*)tb + (csb-4)<=sbuff){memcpy(((char*)(pbuff) + *(unsigned int*)tb),&tb[4],csb-4);}
-			ccrp+=csb-4;
+			if (*(unsigned int*)tb + *(unsigned short*)(tb+4)<=sbuff){memcpy(((unsigned char*)(pbuff) + *(unsigned int*)tb),&tb[6],*(unsigned short*)(tb+4));}
+			ccrp+=*(unsigned short*)(tb+4);
 		}
 		if (nfdwr==1){continue;}
 		if (nfdwr==0){unsigned short yaya;if (lply_read(sock,faddr,&yaya,2,0)<1){return;}}

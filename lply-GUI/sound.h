@@ -6,7 +6,7 @@ void lply_posct(ma_sound *sound)
 	if (!ma_sound_is_playing(sound)){ma_sound_start(sound);}
 }
 
-char lply_capt(SRAMm *rmb,unsigned short rmbs,char *mlist,unsigned int mlistrm,unsigned int tgmi,unsigned int tlmi,char *flist,unsigned int flists,unsigned int tgfi,unsigned int mlisti,unsigned int mlistio,char *is_busy,char *ld,unsigned char **mbuff,unsigned int *sbuff,unsigned int *mds,ma_engine *eng,ma_decoder *decoder,ma_sound *sound,unsigned long long int *mcp,int *sock,struct sockaddr_in *faddr,unsigned int* nls)
+char lply_capt(SRAMm *rmb,unsigned short rmbs,char *mlist,unsigned int mlistrm,unsigned int tgmi,unsigned int tlmi,char *flist,unsigned int flists,unsigned int tgfi,unsigned int mlisti,unsigned int mlistio,char *is_busy,char *ld,unsigned char **mbuff,unsigned int *sbuff,unsigned int *mds,ma_engine *eng,ma_decoder *decoder,ma_sound *sound,unsigned long long int *mcp,int *sock,struct sockaddr_in *faddr,unsigned int* nls,char mfd)
 {
 	*is_busy=1;
 
@@ -26,7 +26,7 @@ char lply_capt(SRAMm *rmb,unsigned short rmbs,char *mlist,unsigned int mlistrm,u
 	
 	*nls=0;
 	if (sfli<=tlmi){if (ma_sound_is_playing(sound)){ma_sound_stop(sound);}ma_sound_uninit(sound);ma_decoder_uninit(decoder);if (lply_gmdfld(mbuff,sbuff,ld,sfb,mds)!=0){free(sfb);*is_busy=0;return -2;}}
-	else {if (lply_gmdsfs(sock,faddr,sfb,sfbs,mbuff,sbuff,mds)!=0){free(sfb);*is_busy=0;return -3;}if (ma_sound_is_playing(sound)){ma_sound_stop(sound);}ma_sound_uninit(sound);ma_decoder_uninit(decoder);lply_rmdaps(sock,faddr,*mbuff,*sbuff,sfb,sfbs,nls);}
+	else {if (lply_gmdsfs(sock,faddr,sfb,sfbs,mbuff,sbuff,mds)!=0){free(sfb);*is_busy=0;return -3;}if (ma_sound_is_playing(sound)){ma_sound_stop(sound);}ma_sound_uninit(sound);ma_decoder_uninit(decoder);if (mfd==0){lply_trmd(sock,faddr,*mbuff,*mds,sfb,sfbs,nls);}if (mfd==1){lply_rmdaps(sock,faddr,*mbuff,*mds,sfb,sfbs,nls);}}
 	
 	free(sfb);
 

@@ -106,6 +106,11 @@ char cfg_pars(struct cnf* conf)
 				if (strcmp(pr,"y")==0){conf->spblm=1;}
 				if (strcmp(pr,"n")==0){conf->spblm=0;}
 			}
+			if (strcmp(arg,"download-method")==0)
+			{
+				if (strcmp(pr,"parallel")==0){conf->mfd=0;}
+				if (strcmp(pr,"sequential")==0){conf->mfd=1;}
+			}
 		}
 		free(cl);
 		fclose(file);

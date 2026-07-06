@@ -26,7 +26,7 @@
 
 int main()
 {
-	struct cnf conf;conf.thie=0;conf.wm=0;memset(&(conf.tc),0,6);conf.win_width=864;conf.win_height=576;conf.drsbuff=32;conf.spblm=0;conf.bluc=0;
+	struct cnf conf;conf.thie=0;conf.wm=0;memset(&(conf.tc),0,6);conf.win_width=864;conf.win_height=576;conf.drsbuff=32;conf.spblm=0;conf.bluc=0;conf.mfd=0;
 	if (cfg_pars(&conf)!=0){return -1;}
 	
 	int sock=-1;struct sockaddr_in addr;struct sockaddr_in faddr;memset(&addr,0,sizeof(addr));memset(&faddr,0,sizeof(faddr));
@@ -121,7 +121,7 @@ int main()
 			if (ev.type==SDL_KEYDOWN &&ev.key.keysym.sym==SDLK_KP_PLUS){if (lobg>=0){break;}unsigned char* px;int pitch=0;if(SDL_LockTexture(btex,NULL,(void**)&px,&pitch)==0){for (unsigned int i=0;i<=tex_width*tex_height*3;i++){px[i]=px[i]*2;}SDL_UnlockTexture(btex);lobg+=1;}}
 			if (ev.type==SDL_KEYDOWN &&ev.key.keysym.sym==SDLK_KP_MINUS){if (lobg<=-5){break;}unsigned char* px;int pitch=0;if (SDL_LockTexture(btex,NULL,(void**)&px,&pitch)==0){for (unsigned int i=0;i<=tex_width*tex_height*3;i++){px[i]=px[i]/2;}SDL_UnlockTexture(btex);lobg-=1;}}
 			if (ev.type==SDL_KEYDOWN && ev.key.keysym.sym==SDLK_SPACE &&ev.key.repeat==0){lply_posct(&sound);break;}
-			if (cur_opp==0 &&is_busy==0 &&ev.type==SDL_KEYDOWN &&ev.key.keysym.sym==SDLK_RETURN &&ev.key.repeat==0){cidx=mlisti+mlistio;thrd_t thr;TSlply_capt* ts=malloc(sizeof(TSlply_capt));ts->rmb=rmbuff;ts->rmbs=cua;ts->mlist=gmlist;ts->mlistrm=gmlists;ts->tgmi=tgmi;ts->tlmi=tlmi;ts->flist=gflist;ts->flists=gflists;ts->tgfi=tgfi;ts->mlisti=mlisti;ts->mlistio=mlistio;ts->is_busy=&is_busy;ts->ld=conf.lmd;ts->mbuff=&mbuff;ts->sbuff=&sbuff;ts->mds=&rmds;ts->eng=&eng;ts->decoder=&decoder;ts->sound=&sound;ts->mcp=&mcp;ts->sock=&sock;ts->faddr=&faddr;ts->ra=&cur_opp;ts->nls=&ncrp;thrd_create(&thr,lply_tcapt,ts);thrd_detach(thr);}
+			if (cur_opp==0 &&is_busy==0 &&ev.type==SDL_KEYDOWN &&ev.key.keysym.sym==SDLK_RETURN &&ev.key.repeat==0){cidx=mlisti+mlistio;thrd_t thr;TSlply_capt* ts=malloc(sizeof(TSlply_capt));ts->rmb=rmbuff;ts->rmbs=cua;ts->mlist=gmlist;ts->mlistrm=gmlists;ts->tgmi=tgmi;ts->tlmi=tlmi;ts->flist=gflist;ts->flists=gflists;ts->tgfi=tgfi;ts->mlisti=mlisti;ts->mlistio=mlistio;ts->is_busy=&is_busy;ts->ld=conf.lmd;ts->mbuff=&mbuff;ts->sbuff=&sbuff;ts->mds=&rmds;ts->eng=&eng;ts->decoder=&decoder;ts->sound=&sound;ts->mcp=&mcp;ts->sock=&sock;ts->faddr=&faddr;ts->ra=&cur_opp;ts->nls=&ncrp;ts->mfd=conf.mfd;thrd_create(&thr,lply_tcapt,ts);thrd_detach(thr);}
 			if (cur_opp==2 &&is_busy==0 &&ev.type==SDL_KEYDOWN&&ev.key.keysym.sym==SDLK_RETURN &&ev.key.repeat==0){thrd_t thr;TSlply_ptfr* ts=malloc(sizeof(TSlply_ptfr));ts->rmb=rmbuff;ts->rmbs=cua;ts->tidx=rmi+rmio-1;ts->mbuff=&mbuff;ts->sbuff=&sbuff;ts->mds=&rmds;ts->mcp=&mcp;ts->eng=&eng;ts->sound=&sound;ts->decoder=&decoder;ts->is_busy=&is_busy;thrd_create(&thr,lply_tptfr,ts);thrd_detach(thr);}
 		}
 		if (cur_opp==1){SDL_SetRenderDrawColor(ren,0,0,0,255);SDL_RenderClear(ren);lply_debug(ren,conf.win_width,bff,bffs,sfb,sizeof(sfb),&debug_struct);}
@@ -139,7 +139,7 @@ int main()
 			unsigned int lx=0;
 			for (unsigned int i=tidxfct;gmlist[i]!='\n';i++){printc(gmlist[i],font_size,conf.tc[0],conf.tc[1],conf.tc[2],ren,lx,0,bff,bffs,0);lx+=12*font_size;}
 			printl(&gmlist[tidx],gmlists,font_size,conf.tc[0],conf.tc[1],conf.tc[2],ren,0,14*font_size,bff,bffs);
-			if (is_busy==1 && conf.spblm==1){SDL_SetRenderDrawColor(ren,255,255,255,255);SDL_RenderDrawLine(ren,conf.win_width/2,14*font_size,conf.win_width/2+(ncrp/(sbuff/(conf.win_width/100*20))),14*font_size);}
+			if (is_busy==1 && conf.spblm==1){SDL_SetRenderDrawColor(ren,conf.tc[0],conf.tc[1],conf.tc[2],255);SDL_RenderDrawLine(ren,conf.win_width/2,14*font_size,conf.win_width/2+(ncrp/(sbuff/(conf.win_width/100*20))),14*font_size);}
 		}
 		if (cur_opp==2)
 		{
