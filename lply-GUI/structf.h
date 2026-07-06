@@ -97,3 +97,35 @@ typedef struct
 	unsigned int sp;
 	unsigned short sfg;
 }TSlply_rmdop;
+
+typedef struct
+{
+	char *lstate;
+	char *nstate;
+
+	int *sock;
+	struct sockaddr_in *faddr;
+	char **nmlist;
+	unsigned int *nmlists;
+	unsigned int *tnmi;
+	char **nflist;
+	unsigned int *nflists;
+	unsigned int *tnfi;
+	
+	char **lmlist;
+	unsigned int *lmlists;
+	unsigned int *tlmi;
+	char **lflist;
+	unsigned int *lflists;
+	unsigned int *tlfi;
+	char* lmd;
+
+	char **gmlist;
+	unsigned int *gmlists;
+	unsigned int *tgmi;
+	char **gflist;
+	unsigned int *gflists;
+	unsigned int *tgfi;
+
+	char *rv;
+}TSlply_clists;

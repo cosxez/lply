@@ -58,22 +58,33 @@ int main()
 	unsigned int bffs;
 	if (lply_sthm(conf.bgi,conf.thie,&bfbg,&bff,&bffs)!=0){return -2;}
 	SDL_Texture *btex=NULL;btex=SDL_CreateTexture(ren,SDL_PIXELFORMAT_RGB24,SDL_TEXTUREACCESS_STREAMING,*(unsigned int*)bfbg,*(unsigned int*)(bfbg+4));unsigned int tex_width=*(unsigned int*)bfbg;unsigned int tex_height=*(unsigned int*)(bfbg+4);
-	lply_sa(ren,btex,bfbg);printl("loading...",10,1,144,121,255,ren,conf.win_width/2-12*5,conf.win_height/2,bff,bffs);SDL_RenderPresent(ren);
+	lply_sa(ren,btex,bfbg);
+	char *nmlist=NULL;unsigned int nmlists=0;unsigned int tnmi=0;
+	char *nflist=NULL;unsigned int nflists=0;unsigned int tnfi=0;
+
+	char *lmlist=NULL;unsigned int lmlists=0;unsigned int tlmi=0;
+	char *lflist=NULL;unsigned int lflists=0;unsigned int tlfi=0;
+	
+	char *gmlist=NULL;unsigned int gmlists=0;unsigned int tgmi=0;
+	char *gflist=NULL;unsigned int gflists=0;unsigned int tgfi=0;
+
+	{
+		char ad=0;
+		thrd_t clt;
+		TSlply_clists* ts=malloc(sizeof(TSlply_clists));
+		ts->lstate=&(debug_struct.lstate);
+		ts->nstate=&(debug_struct.nstate);
+		ts->sock=&sock;ts->faddr=&faddr;ts->nmlist=&nmlist;ts->nmlists=&nmlists;ts->tnmi=&tnmi;ts->nflist=&nflist;ts->nflists=&nflists;ts->tnfi=&tnfi;
+		ts->lmlist=&lmlist;ts->lmlists=&lmlists;ts->tlmi=&tlmi;ts->lflist=&lflist;ts->lflists=&lflists;ts->tlfi=&tlfi;ts->lmd=conf.lmd;
+		ts->gmlist=&gmlist;ts->gmlists=&gmlists;ts->tgmi=&tgmi;ts->gflist=&gflist;ts->gflists=&gflists;ts->tgfi=&tgfi;
+		ts->rv=&ad;
+		thrd_create(&clt,lply_clists,ts);thrd_detach(clt);
+		while (1){if (ad==1){break;}SDL_RenderCopy(ren,btex,NULL,NULL);printl("loading...",10,1,144,121,255,ren,conf.win_width/2-12*5,conf.win_height/2,bff,bffs);SDL_RenderPresent(ren);SDL_Delay(20);}
+	}
 	
 	unsigned char sfb[]={0xf1,0x31,0x05,0x7b,0x8b,0x58,0x87,0x87,0xa8,0x85,0x46,0x85,0xb6,0x5a,0xdd,0x0c,0x26,0xd6,0x26,0x2c,0x2c,0xdc,0xdc,0xd6,0x48,0x4a,0x48,0x68,0x68,0x6a,0x6a,0x4a,0x8a,0xaa,0x8a,0x88,0x88,0xa8,0xa8,0xaa};
 	unsigned char font_size=1;
 
-	char *nmlist=NULL;unsigned int nmlists=0;unsigned int tnmi=0;
-	char *nflist=NULL;unsigned int nflists=0;unsigned int tnfi=0;
-	if (debug_struct.nstate==1){if (lply_gmlfls(&sock,&faddr,&nmlist,&nmlists,&tnmi,&nflist,&nflists,&tnfi)!=0){debug_struct.nstate=0;}}
-
-	char *lmlist=NULL;unsigned int lmlists=0;unsigned int tlmi=0;
-	char *lflist=NULL;unsigned int lflists=0;unsigned int tlfi=0;
-	if (debug_struct.lstate==1){lply_gmlfld(&lmlist,&lmlists,&tlmi,&lflist,&lflists,&tlfi,conf.lmd);}
-	
-	char *gmlist=NULL;unsigned int gmlists=0;unsigned int tgmi=0;gmlists=lmlists+nmlists;tgmi=tlmi+tnmi;gmlist=(char*)malloc(gmlists+1);if (lmlist!=NULL && lmlists>0){memcpy(gmlist,lmlist,lmlists);}if (nmlist!=NULL && nmlists>0){memcpy(&gmlist[lmlists],nmlist,nmlists);}
-	char *gflist=NULL;unsigned int gflists=0;unsigned int tgfi=0;gflists=lflists+nflists;tgfi=tlfi+tnfi;gflist=(char*)malloc(gflists+1);if (lflist!=NULL && lflists>0){memcpy(gflist,lflist,lflists);}if (nflist!=NULL && nflists>0){memcpy(&gflist[lflists],nflist,nflists);}
-	
 	unsigned int mlisti=1;unsigned int mlistio=0;unsigned int cidx=0;
 	
 	ma_engine eng;
