@@ -161,7 +161,7 @@ int main()
 			lply_drawc(conf.bluc,conf.cc,ren,font_size,conf.win_width,conf.win_height,rmi,bff,bffs);
 			
 			for (unsigned short i=rmio;i<cua;i++){printl(rmbuff[i].mn,rmbuff[i].mns,font_size,conf.tc[0],conf.tc[1],conf.tc[2],ren,0,(i-rmio+1)*14*font_size,bff,bffs);}
-			printl(rmbuff[rmi+rmio-1].mn,rmbuff[rmi+rmio-1].mns,font_size,conf.tc[0],conf.tc[1],conf.tc[2],ren,0,0,bff,bffs);
+			printl(rmbuff[rmi+rmio-1].mn,rmbuff[rmi+rmio-1].mif (cua>0){ns,font_size,conf.tc[0],conf.tc[1],conf.tc[2],ren,0,0,bff,bffs);}
 		}
 		SDL_RenderPresent(ren);
 		SDL_Delay(20);
