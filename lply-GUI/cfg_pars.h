@@ -28,7 +28,7 @@ char cfg_pars(struct cnf* conf)
 			{
 				if (i<1024&&(cl[i]==' ' || cl[i]=='='))
 				{
-					memcpy(pr,cl+i+1,rss-i-2);
+					memcpy(pr,cl+i+1,rss-i-1);
 					prs=rss-i-2;pr[prs]='\0';
 					break;
 				}
@@ -38,16 +38,18 @@ char cfg_pars(struct cnf* conf)
 			{
 				memcpy(conf->ip,pr,prs);
 				conf->ip[prs]='\0';
+				continue;
 			}
 			if (strcmp(arg,"port")==0)
 			{
-				conf->port=(unsigned short)atoi(pr);
+				conf->port=(unsigned short)atoi(pr);continue;
 			}
 			if (strcmp(arg,"theme-file")==0)
 			{
 				memcpy(conf->bgi,pr,prs);
 				conf->bgi[prs]='\0';
 				conf->thie=1;
+				continue;
 			}
 			if (strcmp(arg,"lm-dir")==0)
 			{
@@ -60,56 +62,40 @@ char cfg_pars(struct cnf* conf)
 				if (strcmp(pr,"no")==0){conf->wm=1;}
 				if (strcmp(pr,"lo")==0){conf->wm=2;}
 				if (strcmp(pr,"uv")==0){conf->wm=0;}
+				continue;
 			}
-			if (strcmp(arg,"text-color-red")==0)
+			if (strcmp(arg,"text-color")==0)
 			{
-				conf->tc[0]=(unsigned char)atoi(pr);
+				unsigned char tidx=0;unsigned char pb=0;for (unsigned char i=0;i<prs+1;i++){if (pr[i]==','||i==prs){char crc[i-tidx+1];memcpy(crc,&pr[tidx],i-tidx);crc[i-tidx]='\0';conf->tc[pb]=(unsigned char)atoi(crc);pb+=1;tidx=i+1;}}continue;
 			}
-			if (strcmp(arg,"text-color-green")==0)
+			if (strcmp(arg,"cursor-color")==0)
 			{
-				conf->tc[1]=(unsigned char)atoi(pr);
-			}
-			if (strcmp(arg,"text-color-blue")==0)
-			{
-				conf->tc[2]=(unsigned char)atoi(pr);
-			}
-			if (strcmp(arg,"cursor-color-red")==0)
-			{
-				conf->cc[0]=(unsigned char)atoi(pr);
-			}
-			if (strcmp(arg,"cursor-color-green")==0)
-			{
-				conf->cc[1]=(unsigned char)atoi(pr);
-			}
-			if (strcmp(arg,"cursor-color-blue")==0)
-			{
-				conf->cc[2]=(unsigned char)atoi(pr);
+				unsigned char tidx=0;unsigned char pb=0;for (unsigned char i=0;i<prs+1;i++){if (pr[i]==','||i==prs){char crc[i-tidx+1];memcpy(crc,&pr[tidx],i-tidx);crc[i-tidx]='\0';conf->cc[pb]=(unsigned char)atoi(crc);pb+=1;tidx=i+1;}}continue;
 			}
 			if (strcmp(arg,"black-line-under-cursor")==0)
 			{
-				if (strcmp(pr,"y")==0){conf->bluc=1;}
+				if (strcmp(pr,"y")==0){conf->bluc=1;}continue;
 			}
 			if (strcmp(arg,"win-width")==0)
 			{
-				conf->win_width=(int)atoi(pr);
+				conf->win_width=(int)atoi(pr);continue;
 			}
 			if (strcmp(arg,"win-height")==0)
 			{
-				conf->win_height=(int)atoi(pr);
+				conf->win_height=(int)atoi(pr);continue;
 			}
 			if (strcmp(arg,"reserve-ram")==0)
 			{
-				conf->drsbuff=(unsigned int)atoi(pr);
+				conf->drsbuff=(unsigned int)atoi(pr);continue;
 			}
 			if (strcmp(arg,"show-progress-bar")==0)
 			{
-				if (strcmp(pr,"y")==0){conf->spblm=1;}
-				if (strcmp(pr,"n")==0){conf->spblm=0;}
+				if (strcmp(pr,"y")==0){conf->spblm=1;continue;}
 			}
 			if (strcmp(arg,"download-method")==0)
 			{
-				if (strcmp(pr,"parallel")==0){conf->mfd=0;}
-				if (strcmp(pr,"sequential")==0){conf->mfd=1;}
+				if (strcmp(pr,"parallel")==0){conf->mfd=0;continue;}
+				if (strcmp(pr,"sequential")==0){conf->mfd=1;continue;}
 			}
 		}
 		free(cl);
