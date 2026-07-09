@@ -115,6 +115,9 @@ int main()
 		{
 			if (ev.type==SDL_QUIT){run=0;}
 
+			if (ev.type==SDL_KEYDOWN && (ev.key.keysym.mod & KMOD_LSHIFT)!=0&&ev.key.keysym.sym==SDLK_RIGHT){lply_mttit(&eng,&sound,5,mcp);}
+			if (ev.type==SDL_KEYDOWN && (ev.key.keysym.mod & KMOD_LSHIFT)!=0 &&ev.key.keysym.sym==SDLK_LEFT){lply_mttit(&eng,&sound,-5,mcp);}
+
 			if (ev.type==SDL_KEYDOWN && (ev.key.keysym.mod & KMOD_ALT)!=0 && ev.key.keysym.sym==SDLK_UP){if ((cv+0.05)<=1){cv+=0.05;ma_engine_set_volume(&eng,cv);break;}}
 			if (ev.type==SDL_KEYDOWN && (ev.key.keysym.mod & KMOD_ALT)!=0 && ev.key.keysym.sym==SDLK_DOWN){if ((cv-0.05)>=0){cv-=0.05;ma_engine_set_volume(&eng,cv);break;}}
 			

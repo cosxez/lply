@@ -6,6 +6,16 @@ void lply_posct(ma_sound *sound)
 	if (!ma_sound_is_playing(sound)){ma_sound_start(sound);}
 }
 
+void lply_mttit(ma_engine *eng,ma_sound *sound,short range,unsigned long long int mcp)
+{
+	unsigned long long int ccp;ma_sound_get_cursor_in_pcm_frames(sound,&ccp);
+
+	long long int offset=(long long int)ma_engine_get_sample_rate(eng)*range;
+	if (offset>0 && offset+ccp>=mcp){ma_sound_seek_to_pcm_frame(sound,0);if (ma_sound_is_playing(sound)){ma_sound_stop(sound);}return;}
+	if (offset<0 && -offset>ccp){ma_sound_seek_to_pcm_frame(sound,0);return;}
+	ma_sound_seek_to_pcm_frame(sound,ccp+offset);
+}
+
 char lply_capt(SRAMm *rmb,unsigned short rmbs,char *mlist,unsigned int mlistrm,unsigned int tgmi,unsigned int tlmi,char *flist,unsigned int flists,unsigned int tgfi,unsigned int mlisti,unsigned int mlistio,char *is_busy,char *ld,unsigned char **mbuff,unsigned int *sbuff,unsigned int *mds,ma_engine *eng,ma_decoder *decoder,ma_sound *sound,unsigned long long int *mcp,int *sock,struct sockaddr_in *faddr,unsigned int* nls,char mfd)
 {
 	*is_busy=1;
