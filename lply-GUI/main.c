@@ -79,14 +79,14 @@ int main()
 		ts->gmlist=&gmlist;ts->gmlists=&gmlists;ts->tgmi=&tgmi;ts->gflist=&gflist;ts->gflists=&gflists;ts->tgfi=&tgfi;
 		ts->rv=&ad;
 		thrd_create(&clt,lply_clists,ts);thrd_detach(clt);
-		while (1){if (ad==1){break;}SDL_RenderCopy(ren,btex,NULL,NULL);printl("loading...",10,1,144,121,255,ren,conf.win_width/2-12*5,conf.win_height/2,bff,bffs);SDL_RenderPresent(ren);SDL_Delay(20);}
+		while (1){while (SDL_PollEvent(&ev)){if (ev.type==SDL_QUIT){free(gmlist);free(gflist);free(nmlist);free(nflist);free(lmlist);free(lflist);free(bfbg);free(bff);ad=-1;break;}}if (ad==-1){return -321;}if (ad==1){break;}SDL_RenderCopy(ren,btex,NULL,NULL);printl("loading...",10,1,144,121,255,ren,conf.win_width/2-12*5,conf.win_height/2,bff,bffs);SDL_RenderPresent(ren);SDL_Delay(20);}
 	}
 	
 	unsigned char sfb[]={0xf1,0x31,0x05,0x7b,0x8b,0x58,0x87,0x87,0xa8,0x85,0x46,0x85,0xb6,0x5a,0xdd,0x0c,0x26,0xd6,0x26,0x2c,0x2c,0xdc,0xdc,0xd6,0x48,0x4a,0x48,0x68,0x68,0x6a,0x6a,0x4a,0x8a,0xaa,0x8a,0x88,0x88,0xa8,0xa8,0xaa};
 	unsigned char font_size=1;
 
 	unsigned int mlisti=1;unsigned int mlistio=0;unsigned int cidx=0;
-	
+
 	ma_engine eng;
 	ma_engine_init(NULL,&eng);
 	ma_decoder decoder={0};
@@ -145,6 +145,7 @@ int main()
 		if (cur_opp==-3){SDL_SetRenderDrawColor(ren,0,0,0,255);SDL_RenderClear(ren);printl("Error: failed to get media data size",36,2,255,0,0,ren,conf.win_width/2-12*2*18,conf.win_height/2-14*2,bff,bffs);}
 		if (cur_opp==-4){SDL_SetRenderDrawColor(ren,0,0,0,255);SDL_RenderClear(ren);printl("Error: file \"config\" not found",30,2,255,0,0,ren,conf.win_width/2-12*2*15,conf.win_height/2-14*2,bff,bffs);}
 
+		if (ma_sound_at_end(&sound) &&is_busy==0){lply_nxtt(&cidx,tgmi);thrd_t thr;TSlply_capt* ts=malloc(sizeof(TSlply_capt));ts->rmb=rmbuff;ts->rmbs=cua;ts->mlist=gmlist;ts->mlistrm=gmlists;ts->tgmi=tgmi;ts->tlmi=tlmi;ts->flist=gflist;ts->flists=gflists;ts->tgfi=tgfi;ts->mlisti=cidx;ts->mlistio=0;ts->is_busy=&is_busy;ts->ld=conf.lmd;ts->mbuff=&mbuff;ts->sbuff=&sbuff;ts->mds=&rmds;ts->eng=&eng;ts->decoder=&decoder;ts->sound=&sound;ts->mcp=&mcp;ts->sock=&sock;ts->faddr=&faddr;ts->ra=&cur_opp;ts->nls=&ncrp;ts->mfd=conf.mfd;thrd_create(&thr,lply_tcapt,ts);thrd_detach(thr);}
 		if (cur_opp==0)
 		{
 			SDL_RenderCopy(ren,btex,NULL,NULL);
@@ -175,7 +176,7 @@ int main()
 	sclose(&sock);
 
 	if (ma_sound_is_playing(&sound)){ma_sound_stop(&sound);}
-	
+
 	for (unsigned short i=0;i<cua;i++){if (rmbuff[i].mba!=NULL){free(rmbuff[i].mba);rmbuff[i].mba=NULL;}if (rmbuff[i].mn!=NULL){free(rmbuff[i].mn);rmbuff[i].mn=NULL;}}
 
 	if (rmbuff!=NULL){free(rmbuff);}
