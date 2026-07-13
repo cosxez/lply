@@ -66,5 +66,5 @@ char lply_ptfr(SRAMm *rmb,unsigned short rmbs,unsigned int tidx,unsigned char **
 
 void lply_nxtt(unsigned int *cidx,unsigned int mlists)
 {
-	if (*cidx+1<mlists){*cidx+=1;return;}*cidx=1;
+	if (*cidx+1<=mlists){*cidx+=1;return;}*cidx=1;
 }
