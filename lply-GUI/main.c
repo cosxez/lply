@@ -26,7 +26,7 @@
 
 int main()
 {
-	struct cnf conf;conf.thie=0;conf.wm=0;memset(&(conf.tc),0,6);conf.win_width=864;conf.win_height=576;conf.drsbuff=32;conf.spblm=0;conf.bluc=0;conf.mfd=0;
+	struct cnf conf;conf.thie=0;conf.wm=0;memset(&(conf.tc),0,6);conf.win_width=864;conf.win_height=576;conf.drsbuff=32;conf.spblm=0;conf.bluc=0;conf.mfd=0;conf.fts=1;
 	char cur_opp=0;
 	if (cfg_pars(&conf)==1){cur_opp=-4;}
 	
@@ -83,7 +83,7 @@ int main()
 	}
 	
 	unsigned char sfb[]={0xf1,0x31,0x05,0x7b,0x8b,0x58,0x87,0x87,0xa8,0x85,0x46,0x85,0xb6,0x5a,0xdd,0x0c,0x26,0xd6,0x26,0x2c,0x2c,0xdc,0xdc,0xd6,0x48,0x4a,0x48,0x68,0x68,0x6a,0x6a,0x4a,0x8a,0xaa,0x8a,0x88,0x88,0xa8,0xa8,0xaa};
-	unsigned char font_size=1;
+	unsigned char font_size=conf.fts;
 
 	unsigned int mlisti=1;unsigned int mlistio=0;unsigned int cidx=0;
 

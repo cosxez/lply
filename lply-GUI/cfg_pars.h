@@ -97,6 +97,10 @@ char cfg_pars(struct cnf* conf)
 				if (strcmp(pr,"parallel")==0){conf->mfd=0;continue;}
 				if (strcmp(pr,"sequential")==0){conf->mfd=1;continue;}
 			}
+			if (strcmp(arg,"font-size")==0)
+			{
+				conf->fts=(unsigned char)atoi(pr);continue;
+			}
 		}
 		free(cl);
 		fclose(file);

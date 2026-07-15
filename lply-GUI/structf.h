@@ -7,6 +7,7 @@ struct cnf
 	char ip[128];
 	int win_width;
 	int win_height;
+	unsigned char fts;
 	unsigned int drsbuff;
 	unsigned short port;
 	char thie;
