@@ -109,6 +109,8 @@ int main()
 	char lobg=0;
 	if (debug_struct.lstate==0 && debug_struct.nstate==0 && cur_opp==0){cur_opp=-1;}
 
+	float *tgrvw=(float*)malloc(conf.vvl*4);
+	for (unsigned short i=0;i<conf.vvl;i++){tgrvw[i]=sin(i*(360.0f/conf.vvl)*(M_PI/180));}
 	while (run)
 	{
 		while(SDL_PollEvent(&ev))
@@ -162,7 +164,7 @@ int main()
 				printl(&gmlist[tidx],gmlists,font_size,conf.tc[0],conf.tc[1],conf.tc[2],ren,0,14*font_size,bff,bffs);
 			}
 			if (is_busy==1 && conf.spblm==1){SDL_SetRenderDrawColor(ren,conf.tc[0],conf.tc[1],conf.tc[2],255);SDL_RenderDrawLine(ren,conf.win_width/2,14*font_size,conf.win_width/2+(ncrp/(rmds/(conf.win_width/100*20))),14*font_size);}
-			if (conf.svv==2){SDL_SetRenderDrawColor(ren,conf.vc[0],conf.vc[1],conf.vc[2],255);for (unsigned short i=0;i<conf.vvl;i++){SDL_RenderDrawLine(ren,conf.win_width-(conf.win_width/100*15)-90+i,sin(i*(360.0f/conf.vvl)*(M_PI/180))*cv*10+conf.win_height-(conf.win_height/100*15),conf.win_width-(conf.win_width/100*15)-90+i,sin(i*(360.0f/conf.vvl)*(M_PI/180))*cv*10+conf.win_height-(conf.win_height/100*15)+1);}}
+			if (conf.svv==2){SDL_SetRenderDrawColor(ren,conf.vc[0],conf.vc[1],conf.vc[2],255);for (unsigned short i=0;i<conf.vvl;i++){SDL_RenderDrawLine(ren,conf.win_width-(conf.win_width/100*15)-90+i,tgrvw[i]*cv*10+conf.win_height-(conf.win_height/100*15),conf.win_width-(conf.win_width/100*15)-90+i,tgrvw[i]*cv*10+conf.win_height-(conf.win_height/100*15)+1);}}
 		}
 		if (cur_opp==2)
 		{
@@ -179,6 +181,8 @@ int main()
 	sclose(&sock);
 
 	if (ma_sound_is_playing(&sound)){ma_sound_stop(&sound);}
+
+	free(tgrvw);
 
 	for (unsigned short i=0;i<cua;i++){if (rmbuff[i].mba!=NULL){free(rmbuff[i].mba);rmbuff[i].mba=NULL;}if (rmbuff[i].mn!=NULL){free(rmbuff[i].mn);rmbuff[i].mn=NULL;}}
 
