@@ -26,7 +26,7 @@
 
 int main()
 {
-	struct cnf conf;conf.thie=0;conf.wm=0;memset(&(conf.tc),0,6);conf.win_width=864;conf.win_height=576;conf.drsbuff=32;conf.spblm=0;conf.bluc=0;conf.mfd=0;conf.fts=1;
+	struct cnf conf;conf.thie=0;conf.wm=0;memset(&(conf.tc),0,3);memset(&(conf.cc),0,3);memset(&(conf.vc),0,3);conf.win_width=864;conf.win_height=576;conf.drsbuff=32;conf.spblm=0;conf.bluc=0;conf.mfd=0;conf.fts=1;conf.svv=1;conf.vvl=100;
 	char cur_opp=0;
 	if (cfg_pars(&conf)==1){cur_opp=-4;}
 	
@@ -94,7 +94,7 @@ int main()
 	unsigned long long int mcp=0;
 
 	unsigned char* mbuff=NULL;
-	unsigned int sbuff=1024*1024*3;unsigned int rmds=0;
+	unsigned int sbuff=1024*1024*3;unsigned int rmds=1024*1024*3;
 	mbuff=(unsigned char*)malloc(sbuff);
 
 	unsigned int ncrp=0;
@@ -118,8 +118,8 @@ int main()
 			if (ev.type==SDL_KEYDOWN && (ev.key.keysym.mod & KMOD_LSHIFT)!=0&&ev.key.keysym.sym==SDLK_RIGHT){lply_mttit(&eng,&sound,5,mcp);}
 			if (ev.type==SDL_KEYDOWN && (ev.key.keysym.mod & KMOD_LSHIFT)!=0 &&ev.key.keysym.sym==SDLK_LEFT){lply_mttit(&eng,&sound,-5,mcp);}
 
-			if (ev.type==SDL_KEYDOWN && (ev.key.keysym.mod & KMOD_ALT)!=0 && ev.key.keysym.sym==SDLK_UP){if ((cv+0.05)<=1){cv+=0.05;ma_engine_set_volume(&eng,cv);break;}}
-			if (ev.type==SDL_KEYDOWN && (ev.key.keysym.mod & KMOD_ALT)!=0 && ev.key.keysym.sym==SDLK_DOWN){if ((cv-0.05)>=0){cv-=0.05;ma_engine_set_volume(&eng,cv);break;}}
+			if (ev.type==SDL_KEYDOWN && (ev.key.keysym.mod & KMOD_ALT)!=0 && ev.key.keysym.sym==SDLK_UP){if ((cv+0.05)>1){cv=1;ma_engine_set_volume(&eng,cv);break;}cv+=0.05;ma_engine_set_volume(&eng,cv);break;}
+			if (ev.type==SDL_KEYDOWN && (ev.key.keysym.mod & KMOD_ALT)!=0 && ev.key.keysym.sym==SDLK_DOWN){if ((cv-0.05)<0){cv=0;ma_engine_set_volume(&eng,cv);break;}cv-=0.05;ma_engine_set_volume(&eng,cv);break;}
 			
 			if (cur_opp==2 &&ev.type==SDL_KEYDOWN && (ev.key.keysym.mod & KMOD_ALT)==0 && ev.key.keysym.sym==SDLK_UP){if (rmio>0 && ((rmi+2)*(14*font_size)==(3*(14*font_size)))){rmio-=1;break;}if ((rmi+rmio)>1){rmi-=1;break;}}
 			if (cur_opp==2 &&ev.type==SDL_KEYDOWN && (ev.key.keysym.mod & KMOD_ALT)==0 && ev.key.keysym.sym==SDLK_DOWN){if ((rmi+rmio)<cua && ((rmi+2)*(14*font_size)<conf.win_height)){rmi+=1;break;}if ((rmi+rmio)<tgmi && ((rmi+2)*(14*font_size)>=conf.win_height)){rmio+=1;break;}}
@@ -128,6 +128,8 @@ int main()
 			if (cur_opp==0 &&ev.type==SDL_KEYDOWN && (ev.key.keysym.mod & KMOD_ALT)==0 && ev.key.keysym.sym==SDLK_DOWN){if ((mlisti+mlistio)<tgmi && ((mlisti+2)*(14*font_size)<conf.win_height)){mlisti+=1;break;}if ((mlisti+mlistio)<tgmi && ((mlisti+2)*(14*font_size)>=conf.win_height)){mlistio+=1;break;}}
 			
 			if (cur_opp==0 &&is_busy==0 &&ev.type==SDL_KEYDOWN &&ev.key.keysym.sym==SDLK_p){char ign=0;for (unsigned short i=0;i<cua;i++){if (rmbuff[i].idx==cidx){ign=1;break;}}if (ign==0&&cua<512){is_busy=1;SRAMm ts;ts.mba=(unsigned char*)malloc(rmds);memcpy(ts.mba,mbuff,rmds);ts.mbs=rmds;unsigned int npv=0;unsigned int tidx=0;for (unsigned int i=0;i<gmlists;i++){if (npv==cidx-1){tidx=i;break;}if (gmlist[i]=='\n'){npv+=1;}}for (unsigned int i=tidx;i<gmlists+1;i++){if (npv==cidx){ts.mn=(char*)malloc(i-tidx);memcpy(ts.mn,&gmlist[tidx],i-tidx);ts.mns=i-tidx;break;}if (gmlist[i]=='\n'){npv+=1;}}ts.idx=cidx;rmbuff[cua]=ts;cua+=1;is_busy=0;}break;}
+
+			if (ev.type==SDL_KEYDOWN &&ev.key.keysym.sym==SDLK_v){if (conf.svv==1){conf.svv=2;break;}if (conf.svv==2){conf.svv=1;break;}}
 
 			if (ev.type==SDL_KEYDOWN &&ev.key.keysym.sym==SDLK_d){if (cur_opp==0){cur_opp=1;break;}cur_opp=0;}
 
@@ -159,7 +161,8 @@ int main()
 				for (unsigned int i=tidxfct;gmlist[i]!='\n';i++){printc(gmlist[i],font_size,conf.tc[0],conf.tc[1],conf.tc[2],ren,lx,0,bff,bffs,0);lx+=12*font_size;}
 				printl(&gmlist[tidx],gmlists,font_size,conf.tc[0],conf.tc[1],conf.tc[2],ren,0,14*font_size,bff,bffs);
 			}
-			if (is_busy==1 && conf.spblm==1){SDL_SetRenderDrawColor(ren,conf.tc[0],conf.tc[1],conf.tc[2],255);SDL_RenderDrawLine(ren,conf.win_width/2,14*font_size,conf.win_width/2+(ncrp/(sbuff/(conf.win_width/100*20))),14*font_size);}
+			if (is_busy==1 && conf.spblm==1){SDL_SetRenderDrawColor(ren,conf.tc[0],conf.tc[1],conf.tc[2],255);SDL_RenderDrawLine(ren,conf.win_width/2,14*font_size,conf.win_width/2+(ncrp/(rmds/(conf.win_width/100*20))),14*font_size);}
+			if (conf.svv==2){SDL_SetRenderDrawColor(ren,conf.vc[0],conf.vc[1],conf.vc[2],255);for (unsigned short i=0;i<conf.vvl;i++){SDL_RenderDrawLine(ren,conf.win_width-(conf.win_width/100*15)-90+i,sin(i*(360.0f/conf.vvl)*(M_PI/180))*cv*10+conf.win_height-(conf.win_height/100*15),conf.win_width-(conf.win_width/100*15)-90+i,sin(i*(360.0f/conf.vvl)*(M_PI/180))*cv*10+conf.win_height-(conf.win_height/100*15)+1);}}
 		}
 		if (cur_opp==2)
 		{

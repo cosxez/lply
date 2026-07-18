@@ -101,6 +101,15 @@ char cfg_pars(struct cnf* conf)
 			{
 				conf->fts=(unsigned char)atoi(pr);continue;
 			}
+			if (strcmp(arg,"volume-long")==0)
+			{
+				unsigned short tp=(unsigned short)atoi(pr);
+				if (tp>0){conf->vvl=tp;}
+			}
+			if (strcmp(arg,"volume-color")==0)
+			{
+				unsigned char tidx=0;unsigned char pb=0;for (unsigned char i=0;i<prs+1;i++){if (pr[i]==','||i==prs){char crc[i-tidx+1];memcpy(crc,&pr[tidx],i-tidx);crc[i-tidx]='\0';conf->vc[pb]=(unsigned char)atoi(crc);pb+=1;tidx=i+1;}}continue;
+			}
 		}
 		free(cl);
 		fclose(file);

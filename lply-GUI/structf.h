@@ -7,16 +7,19 @@ struct cnf
 	char ip[128];
 	int win_width;
 	int win_height;
-	unsigned char fts;
 	unsigned int drsbuff;
+	unsigned char tc[3];
+	unsigned char cc[3];
+	unsigned char vc[3];
 	unsigned short port;
+	unsigned short vvl;
 	char thie;
 	char wm;
 	char spblm;
-	unsigned char tc[3];
-	unsigned char cc[3];
+	unsigned char fts;
 	char bluc;
 	char mfd;
+	char svv;
 };
 
 struct fcamn
