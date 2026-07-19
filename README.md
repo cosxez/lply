@@ -1,6 +1,6 @@
 ### Configuration
-In ```bash config```
-```bash #ip=server ip address, example: 
+In ```config```
+```#ip=server ip address, example: 
 ip=192.168.0.100
 #port=server port(3580 is default port for lply-server), example:
 port=3580
