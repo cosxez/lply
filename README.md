@@ -5,8 +5,8 @@ In ```config``` file near with exexute file
 ip=192.168.0.100
 #port=server port(3580 is default port for lply-server), example:
 port=3580
-#theme-file=path to theme file(.jdft format, base-thm.jdftby default), example:
-theme-file=themes/test.jdft
+#theme-file=path to theme file(.jdft format, base-thm.jdft by default), example:
+theme-file=base-thm.jdft
 #lm-dir=path to directory(now dont handle ~) with media files(mp3/wav/slpm), example:
 lm-dir=../Music
 #work-mode=can work in: uv(universal mode, network and local - by default), no(netwotk only, without local), lo(local only, without network, recomend to set if dont use server for faster loading)
