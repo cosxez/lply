@@ -1,0 +1,29 @@
+### Configuration
+In ```bash config```
+```bash #ip=server ip address, example: 
+ip=192.168.0.100
+#port=server port(3580 is default port for lply-server), example:
+port=3580
+#theme-file=path to theme file(.jdft format, base-thm.jdftby default), example:
+theme-file=themes/test.jdft
+#lm-dir=path to directory(now dont handle ~) with media files(mp3/wav/slpm), example:
+lm-dir=../Music
+#work-mode=can work in: uv(universal mode, network and local - by default), no(netwotk only, without local), lo(local only, without network, recomend to set if dont use server for faster loading)
+#text-color=accept rgb type, example:
+text-color=144,121,255
+#cursor-color=accept rgb type, example:
+cursor-color=144,121,255
+#black-line-under-cursor=need for better cursor vision, accept y
+#win-width=window width, example:
+win-width=1024
+#win-height=window height, example:
+win-height=576
+#reserve-ram=tracks value which can safe to RAM, example:
+reserve-ram=10
+#show-progress-bar=show current size of download data, accept y
+#download-method=accept parallel(by default)/sequential
+#font-size=from 0 to 255, 1 by default
+#volume-long=visual wave length in pixels(120 by default), example:
+volume-long=120
+#volume-color=accept rgb type, example:
+volume-color=144,121,255```
