@@ -26,4 +26,4 @@ reserve-ram=10
 #volume-long=visual wave length in pixels(120 by default), example:
 volume-long=120
 #volume-color=accept rgb type, example:
-volume-color=144,121,255```
+volume-color=144,121,255
